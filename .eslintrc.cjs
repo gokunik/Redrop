@@ -15,7 +15,13 @@ module.exports = {
     "plugin:prettier/recommended",
   ],
   overrides: [],
-  ignorePatterns: ["node_modules", "dist", ".eslintrc.cjs", "vite.config.ts"],
+  ignorePatterns: [
+    "node_modules",
+    "dist",
+    ".eslintrc.cjs",
+    "vite.config.ts",
+    "commitlint.config.cjs",
+  ],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
