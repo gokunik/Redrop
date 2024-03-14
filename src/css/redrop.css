@@ -1,0 +1,32 @@
+.redrop-drag-preview {
+  position: absolute !important;
+  pointer-events: none !important;
+  z-index: 999;
+  opacity: 0.8;
+  outline: 0.5px solid rgba(0, 166, 231, 0.915) !important;
+  box-sizing: border-box !important;
+}
+
+.redrop-active-dropzone-highlight {
+  outline: 2px dashed rgb(1, 188, 1) !important;
+  outline-offset: -1px;
+}
+
+.redrop-drag {
+  cursor: grab;
+}
+
+.redrop-current-draggable-effect-none,
+.redrop-current-draggable-effect-none * {
+  cursor: grabbing !important;
+}
+
+.redrop-current-draggable-effect-copy,
+.redrop-current-draggable-effect-copy * {
+  cursor: copy !important;
+}
+
+.redrop-current-draggable-effect-move,
+.redrop-current-draggable-effect-move * {
+  cursor: move !important;
+}
