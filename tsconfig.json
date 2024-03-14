@@ -25,8 +25,18 @@
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    // path
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@consts/*": ["./src/consts/*"],
+      "@app/*": ["./src/app/*"],
+    },
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["./main.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist"],
 }

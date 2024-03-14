@@ -15,13 +15,7 @@ module.exports = {
     "plugin:prettier/recommended",
   ],
   overrides: [],
-  ignorePatterns: [
-    "node_modules",
-    "dist",
-    ".eslintrc.cjs",
-    "vite.config.ts",
-    "commitlint.config.cjs",
-  ],
+  ignorePatterns: ["main.ts", "node_modules", "dist", ".eslintrc.cjs", "vite.config.ts", "commitlint.config.cjs"],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
@@ -29,10 +23,18 @@ module.exports = {
   },
   rules: {
     "import/extensions": "off",
-    "prettier/prettier": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        printWidth: 100,
+      },
+    ],
     "@typescript-eslint/explicit-function-return-type": "off",
     "no-console": "off",
     "import/prefer-default-export": "off",
+    "@typescript-eslint/consistent-type-definitions": "off",
+    "@typescript-eslint/lines-between-class-members": "off",
+    "no-underscore-dangle": "off",
     "array-element-newline": [
       "error",
       {
