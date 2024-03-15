@@ -1,5 +1,5 @@
-import { DEFAULT_GLOBAL_OPTIONS } from "@/consts";
-import { setDraggableOptions, setDroppableOptions, setGlobalOptions } from "@/utils/setOptions";
+import { DEFAULT_GLOBAL_OPTIONS } from "@/consts/index.ts";
+import { setDraggableOptions, setDroppableOptions, setGlobalOptions } from "@/utils/setOptions.ts";
 import type {
   DndState,
   SetState,
@@ -26,7 +26,7 @@ import type {
   DroppableElements,
   DraggableElements,
   EventAbortController,
-} from "@/types";
+} from "@/types/index.ts";
 
 export class Redrop {
   readonly #globalOptions: BaseGlobalType;

@@ -1,8 +1,8 @@
 // Event types
 
-import type { DraggableElement } from "./draggable";
-import type { DroppableElement } from "./droppable";
-import type { DndState } from "./state";
+import type { DraggableElement } from "./draggable.ts";
+import type { DroppableElement } from "./droppable.ts";
+import type { DndState } from "./state.ts";
 
 export type EventAbortController = {
   dragEvents: Map<Element, AbortController>;

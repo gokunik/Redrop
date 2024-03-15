@@ -1,5 +1,5 @@
-import type { DraggableElement, BaseDraggableType } from "./draggable";
-import type { DroppableElement, BaseDroppableType } from "./droppable";
+import type { DraggableElement, BaseDraggableType } from "./draggable.ts";
+import type { DroppableElement, BaseDroppableType } from "./droppable.ts";
 
 type Coords = { x: number; y: number };
 type EventInfo = {

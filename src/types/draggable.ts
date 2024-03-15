@@ -1,6 +1,6 @@
-import type { OnDragEvent, OnDraggablesEvent } from "./event";
-import type { RecursiveAtLeastOne } from "./utiles";
-import type { Redrop } from "@/app";
+import type { OnDragEvent, OnDraggablesEvent } from "./event.ts";
+import type { RecursiveAtLeastOne } from "./utiles.ts";
+import type { Redrop } from "@/app/index.ts";
 
 // note: Please do not add any optional property to the BaseDraggableType
 export type BaseDraggableType = {

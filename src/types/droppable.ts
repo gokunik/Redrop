@@ -1,8 +1,8 @@
 // Droppable types
 
-import type { OnDroppablesEvent, OnDropEvent } from "./event";
-import type { RecursiveAtLeastOne } from "./utiles";
-import type { Redrop } from "@/app";
+import type { OnDroppablesEvent, OnDropEvent } from "./event.ts";
+import type { RecursiveAtLeastOne } from "./utiles.ts";
+import type { Redrop } from "@/app/index.ts";
 
 // note: Please do not add any optional property to the BaseDroppableType
 export type BaseDroppableType = {

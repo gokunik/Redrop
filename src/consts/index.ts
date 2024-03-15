@@ -1,4 +1,4 @@
-import type { BaseDraggableType, BaseDroppableType, BaseGlobalType } from "@/types";
+import type { BaseDraggableType, BaseDroppableType, BaseGlobalType } from "@/types/index.ts";
 
 export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
   identifier: {

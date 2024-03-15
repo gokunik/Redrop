@@ -5,8 +5,8 @@ import type {
   DraggableOptions,
   DroppableOptions,
   GlobalOptions,
-} from "@/types";
-import { DEFAULT_GLOBAL_OPTIONS } from "@/consts";
+} from "@/types/index.ts";
+import { DEFAULT_GLOBAL_OPTIONS } from "@/consts/index.ts";
 
 export function setDraggableOptions(
   globalDraggableOptions: BaseDraggableType,

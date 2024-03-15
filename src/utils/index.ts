@@ -1,1 +1,1 @@
-export * from "./setOptions";
+export * from "./setOptions.ts";
