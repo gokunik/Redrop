@@ -10,12 +10,25 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+
   build: {
+    emptyOutDir: true,
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "Redrop",
       formats: ["es", "umd"],
       fileName: (format) => `index.${format}.js`,
+    },
+
+    rollupOptions: {
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === "style.css") {
+            return "redrop.css";
+          }
+          return assetInfo.name ?? "";
+        },
+      },
     },
   },
 });

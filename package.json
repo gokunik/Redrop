@@ -1,16 +1,30 @@
 {
   "name": "redrop",
-  "version": "0.0.0",
+  "version": "0.0.0-aplha.1",
+  "description": "Redrop is a JS drag and drop library, an alternative to native HTML5 drag and drop API",
+  "keywords": [
+    "redrop",
+    "drag and drop",
+    "HTML5 drag and drop",
+    "Javascript drag and drop"
+  ],
+  "author": {
+    "name": "Nitesh Khatri",
+    "email": "niteshkhatri2226@gmail.com",
+    "url": "https://github.com/gokunik"
+  },
   "type": "module",
-  "main": "./dist/index.umd.js",
-  "module": "./dist/index.es.js",
   "exports": {
     ".": {
       "import": "./dist/index.es.js",
       "require": "./dist/index.umd.js",
       "types": "./dist/index.d.ts",
-      "main": "./dist/index.umd.js"
+      "style": "./dist/redrop.css"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gokunik/Redrop.git"
   },
   "files": [
     "/dist/**"

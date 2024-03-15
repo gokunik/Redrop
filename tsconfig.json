@@ -28,15 +28,15 @@
     "noFallthroughCasesInSwitch": true,
 
     // path
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@types/*": ["./src/types/*"],
       "@utils/*": ["./src/utils/*"],
       "@consts/*": ["./src/consts/*"],
       "@app/*": ["./src/app/*"],
     },
   },
-  "include": ["./main.ts", "src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
 }
