@@ -13,7 +13,7 @@ export function setDraggableOptions(
   options?: DraggableOptions,
 ): BaseDraggableType {
   if (options === undefined) {
-    return JSON.parse(JSON.stringify(globalDraggableOptions));
+    return structuredClone(globalDraggableOptions);
   }
   return {
     identifier: {
@@ -40,11 +40,12 @@ export function setDroppableOptions(
   options?: DroppableOptions,
 ): BaseDroppableType {
   if (options === undefined) {
-    return JSON.parse(JSON.stringify(globalDroppableOptions));
+    return structuredClone(globalDroppableOptions);
   }
   return {
     identifier: {
       id: options?.identifier?.id ?? globalDroppableOptions?.identifier?.id,
+      // @ts-expect-error error expected
       type: options?.identifier?.type ?? globalDroppableOptions?.identifier?.type,
     },
     modifiers: {

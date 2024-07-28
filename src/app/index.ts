@@ -766,7 +766,9 @@ export class Redrop {
   #drop(event: PointerEvent, dropElement: DroppableElement) {
     if (this.#draggedElement === null) return;
 
-    if (this.#isDropEventAllowed(true, dropElement)) return;
+    const isDropAllowed = this.#isDropEventAllowed(true, dropElement);
+    if (isDropAllowed) return;
+
     this.#fireDropEvent(dropElement, "drop", event);
   }
 
