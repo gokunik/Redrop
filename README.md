@@ -19,7 +19,7 @@
 
 ReDrop is a JavaScript drag and drop library, offering an intuitive alternative to the native HTML5 drag and drop API. ReDrop tries to make drag and drop as simple, quick and easy as possible. ReDrop is not built on top of HTML5 drag and drop API because of it's limitations. Under the hood ReDrop uses pointer events to simulate drag and drop with added features.
 
-Get a quick overview of the Redrop [Here](./doc.md) or checkout the doc.md file in the repository.
+Get a quick overview of the Redrop [here](./resources/docs/overview.md) or checkout the doc.md file in the repository.
 
 #### Purpose
 
