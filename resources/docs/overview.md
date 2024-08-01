@@ -119,6 +119,14 @@ enable(reference?: DraggableElement | DroppableElement | DraggableElements | Dro
 
 Enables dragging or dropping for specified elements.
 
+##### setData
+
+```typescript
+setData(data: any, element: DraggableElement): void
+```
+
+Sets data for a draggable element.
+
 ### DraggableElement and DroppableElement
 
 These are enhanced HTML elements with additional methods:
