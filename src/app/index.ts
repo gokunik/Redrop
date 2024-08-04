@@ -261,7 +261,6 @@ export class Redrop {
     }
 
     const draggableOptions = setDraggableOptions(this.#globalOptions.draggableOptions, options);
-    draggableOptions.modifiers.disabled = false;
 
     if (draggableOptions.identifier.id === "") {
       const randomId = `${Date.now().toString(36) + Math.random().toString(36).slice(2)}`;
@@ -293,7 +292,7 @@ export class Redrop {
     Redrop.#setDraggables(this, dragElement, draggableOptions);
 
     const attributes = {
-      draggable: "true",
+      draggable: draggableOptions.modifiers.disabled ? "false" : "true",
       role: draggableOptions.accessibility.role,
       tabIndex: String(draggableOptions.accessibility.tabIndex),
       class: `${dragElement.classList.toString()} redrop-draggable-item redrop-draggable-type-${draggableOptions.identifier.type}`,
@@ -305,7 +304,9 @@ export class Redrop {
 
     Redrop.#setAttributes(dragElement, attributes);
 
-    this.#onPointerDown(dragElement);
+    if (!draggableOptions.modifiers.disabled) {
+      this.#onPointerDown(dragElement);
+    }
     return dragElement;
   }
 
@@ -978,17 +979,22 @@ export class Redrop {
     if (Redrop.getDraggables(this, element as Element).draggableOptions !== undefined) {
       const { draggableOptions } = Redrop.getDraggables(this, element as Element);
       if (options?.modifiers?.disabled !== undefined) {
-        // for user modifers:disable property is readonly, to disable use disable()
-        // eslint-disable-next-line no-param-reassign
-        options.modifiers.disabled = draggableOptions.modifiers.disabled;
+        if (options.modifiers.disabled) {
+          this.#disableDraggable(element);
+        } else {
+          this.#enableDraggable(element);
+        }
       }
       const finalOptions = setDraggableOptions(draggableOptions, options as DraggableOptions);
       Redrop.#setDraggables(this, element as DraggableElement, finalOptions);
     } else if (Redrop.getDroppables(this, element as Element).droppableOptions !== undefined) {
       const { droppableOptions } = Redrop.getDroppables(this, element as Element);
       if (options?.modifiers?.disabled !== undefined) {
-        // eslint-disable-next-line no-param-reassign
-        options.modifiers.disabled = droppableOptions.modifiers.disabled;
+        if (options.modifiers.disabled) {
+          this.#disableDroppable(element);
+        } else {
+          this.#enableDroppable(element);
+        }
       }
       const finalOptions = setDroppableOptions(droppableOptions, options as DroppableOptions);
       Redrop.#setDroppables(this, element as DroppableElement, finalOptions);
@@ -1004,16 +1010,6 @@ export class Redrop {
       | "drag"
       | "drop",
   ) {
-    const disableDraggable = (element: Element) => {
-      Redrop.#setAttributes(element, { draggable: "false", "aria-grabbed": "false" });
-      this.#EventAbortController.dragEvents.get(element)?.abort();
-    };
-
-    const disableDroppable = (element: Element) => {
-      Redrop.#setAttributes(element, { "data-redrop-droppable": "false" });
-      this.#EventAbortController.dropEvents.get(element)?.abort();
-    };
-
     if (reference !== undefined) {
       this.updateOptions(
         {
@@ -1029,23 +1025,23 @@ export class Redrop {
           reference === "drag" ? Redrop.getDraggables(this) : Redrop.getDroppables(this);
         elements.forEach((DndElement) => {
           if (reference === "drag") {
-            disableDraggable(DndElement.element);
+            this.#disableDraggable(DndElement.element);
           } else if (reference === "drop") {
-            disableDroppable(DndElement.element);
+            this.#disableDroppable(DndElement.element);
           }
         });
       } else if (reference instanceof HTMLElement) {
         if (Redrop.getDraggables(this, reference).draggableOptions !== undefined) {
-          disableDraggable(reference);
+          this.#disableDraggable(reference);
         } else if (Redrop.getDroppables(this, reference).droppableOptions !== undefined) {
-          disableDroppable(reference);
+          this.#disableDroppable(reference);
         }
       } else if (Array.isArray(reference)) {
         reference.forEach((element) => {
           if (Redrop.getDraggables(this, element).draggableOptions !== undefined) {
-            disableDraggable(element);
+            this.#disableDraggable(element);
           } else if (Redrop.getDroppables(this, element).droppableOptions !== undefined) {
-            disableDroppable(element);
+            this.#disableDroppable(element);
           }
         });
       }
@@ -1086,16 +1082,6 @@ export class Redrop {
       | "drag"
       | "drop",
   ) {
-    const enableDraggable = (element: Element) => {
-      Redrop.#setAttributes(element, { draggable: "true" });
-      this.#onPointerDown(element as DraggableElement);
-    };
-
-    const enableDroppable = (element: Element) => {
-      Redrop.#setAttributes(element, { "data-redrop-droppable": "true" });
-      this.#initDropEvents(element as DroppableElement);
-    };
-
     if (reference !== undefined) {
       this.updateOptions(
         {
@@ -1111,16 +1097,16 @@ export class Redrop {
           reference === "drag" ? Redrop.getDraggables(this) : Redrop.getDroppables(this);
         elements.forEach((DndElement) => {
           if (reference === "drag") {
-            enableDraggable(DndElement.element);
+            this.#enableDraggable(DndElement.element);
           } else if (reference === "drop") {
-            enableDroppable(DndElement.element);
+            this.#enableDroppable(DndElement.element);
           }
         });
       } else if (reference instanceof HTMLElement) {
         if (Redrop.getDraggables(this, reference).draggableOptions !== undefined) {
-          enableDraggable(reference);
+          this.#enableDraggable(reference);
         } else {
-          enableDroppable(reference);
+          this.#enableDroppable(reference);
         }
       } else if (Array.isArray(reference)) {
         reference.forEach((element) => {
@@ -1144,6 +1130,27 @@ export class Redrop {
       Redrop.#setAttributes(DndElement.element, { "data-redrop-droppable": "true" });
       this.#initDropEvents(DndElement.element);
     });
+  }
+
+  // utility functions for disable and enable
+  #disableDraggable(element: Element) {
+    Redrop.#setAttributes(element, { draggable: "false", "aria-grabbed": "false" });
+    this.#EventAbortController.dragEvents.get(element)?.abort();
+  }
+
+  #disableDroppable(element: Element) {
+    Redrop.#setAttributes(element, { "data-redrop-droppable": "false" });
+    this.#EventAbortController.dropEvents.get(element)?.abort();
+  }
+
+  #enableDraggable(element: Element) {
+    Redrop.#setAttributes(element, { draggable: "true" });
+    this.#onPointerDown(element as DraggableElement);
+  }
+
+  #enableDroppable(element: Element) {
+    Redrop.#setAttributes(element, { "data-redrop-droppable": "true" });
+    this.#initDropEvents(element as DroppableElement);
   }
 
   // end of the class

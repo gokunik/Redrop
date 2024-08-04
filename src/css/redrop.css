@@ -18,15 +18,23 @@
 
 .redrop-current-draggable-effect-none,
 .redrop-current-draggable-effect-none * {
-  cursor: grabbing !important;
+  cursor: grabbing;
 }
 
 .redrop-current-draggable-effect-copy,
 .redrop-current-draggable-effect-copy * {
-  cursor: copy !important;
+  cursor: copy;
 }
 
 .redrop-current-draggable-effect-move,
 .redrop-current-draggable-effect-move * {
-  cursor: move !important;
+  cursor: move;
 }
+
+.redrop-draggable-item[draggable="false"] {
+  cursor: not-allowed;
+}
+
+/* .redrop-draggable-item[draggable="true"] {
+  cursor: grab;
+} */
