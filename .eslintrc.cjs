@@ -21,6 +21,7 @@ module.exports = {
     ".eslintrc.cjs",
     "vite.config.ts",
     "commitlint.config.cjs",
+    "src/css/*.css",
   ],
   parserOptions: {
     ecmaVersion: "latest",
@@ -28,6 +29,7 @@ module.exports = {
     project: "./tsconfig.json",
   },
   rules: {
+    "strict-boolean-expressions": "off",
     "import/extensions": "off",
     "prettier/prettier": [
       "error",

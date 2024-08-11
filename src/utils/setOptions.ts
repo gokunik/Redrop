@@ -23,6 +23,19 @@ export function setDraggableOptions(
     modifiers: {
       disabled: options?.modifiers?.disabled ?? globalDraggableOptions?.modifiers?.disabled,
       dragEffect: options?.modifiers?.dragEffect ?? globalDraggableOptions?.modifiers?.dragEffect,
+      tolerance: {
+        disabled:
+          options?.modifiers?.tolerance?.disabled ??
+          globalDraggableOptions?.modifiers?.tolerance?.disabled,
+        time:
+          options?.modifiers?.tolerance?.time ?? globalDraggableOptions?.modifiers?.tolerance?.time,
+        distance:
+          options?.modifiers?.tolerance?.distance ??
+          globalDraggableOptions?.modifiers?.tolerance?.distance,
+        strictMatch:
+          options?.modifiers?.tolerance?.strictMatch ??
+          globalDraggableOptions?.modifiers?.tolerance?.strictMatch,
+      },
     },
     accessibility: {
       role: options?.accessibility?.role ?? globalDraggableOptions?.accessibility?.role,

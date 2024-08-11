@@ -8,6 +8,12 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
   modifiers: {
     disabled: false,
     dragEffect: "copy",
+    tolerance: {
+      disabled: false,
+      time: 200,
+      distance: 8,
+      strictMatch: true,
+    },
   },
   accessibility: {
     role: "draggable",

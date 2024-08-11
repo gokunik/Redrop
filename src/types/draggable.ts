@@ -11,6 +11,12 @@ export type BaseDraggableType = {
   modifiers: {
     disabled: boolean;
     dragEffect: "copy" | "move" | "none";
+    tolerance: {
+      disabled: boolean;
+      time: number;
+      distance: number;
+      strictMatch: boolean;
+    };
   };
   accessibility: {
     role: string;

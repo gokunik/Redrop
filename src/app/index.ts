@@ -39,6 +39,17 @@ export class Redrop {
   readonly #targetDropzones: DroppableElement[];
   static #isFirstInstanceCreated: boolean;
 
+  #dragTolerance: {
+    disabled: boolean;
+    startTime: number | null;
+    startPosition: {
+      x: number;
+      y: number;
+    };
+    isToleranceReached: boolean;
+    toleranceCheckElement: DraggableElement | null;
+  };
+
   constructor(initialGlobalOptions: GlobalOptions = DEFAULT_GLOBAL_OPTIONS) {
     if (initialGlobalOptions === DEFAULT_GLOBAL_OPTIONS) {
       this.#globalOptions = initialGlobalOptions as BaseGlobalType;
@@ -60,6 +71,17 @@ export class Redrop {
       Redrop.#isFirstInstanceCreated = true;
       document.addEventListener("DOMContentLoaded", this.#initMutationObserver.bind(this));
     }
+
+    this.#dragTolerance = {
+      disabled: false,
+      startTime: 0,
+      startPosition: {
+        x: 0,
+        y: 0,
+      },
+      isToleranceReached: false,
+      toleranceCheckElement: null,
+    };
 
     window.addEventListener("pointermove", this.#onPointerMove.bind(this));
     window.addEventListener("pointerup", this.#onPointerUp.bind(this));
@@ -530,7 +552,29 @@ export class Redrop {
       "pointerdown",
       (event) => {
         event.preventDefault();
-        this.#dragStart(event, dragElement);
+
+        const isDragToleranceDisabled =
+          dragElement._Redrop.draggableOptions.modifiers.tolerance.disabled;
+
+        this.#dragTolerance = {
+          disabled: isDragToleranceDisabled,
+          startTime: Date.now(),
+          startPosition: {
+            x: event.clientX,
+            y: event.clientY,
+          },
+          isToleranceReached: false,
+          toleranceCheckElement: dragElement,
+        };
+
+        const { x, y } = Redrop.#getPosition(event);
+        this.#initialPosition = { x, y };
+
+        if (isDragToleranceDisabled) {
+          this.#dragStart(event, dragElement);
+        } else {
+          this.#checkDragTolerance(event);
+        }
       },
       {
         signal: dragEventAbortController.signal,
@@ -540,6 +584,14 @@ export class Redrop {
 
   #onPointerMove(event: PointerEvent) {
     event.preventDefault();
+
+    if (
+      this.#dragTolerance.toleranceCheckElement !== null &&
+      !this.#dragTolerance.isToleranceReached &&
+      !this.#dragTolerance.disabled
+    ) {
+      this.#checkDragTolerance(event);
+    }
 
     if (this.#draggedElement === null) return;
     this.#drag(event);
@@ -580,6 +632,13 @@ export class Redrop {
   }
 
   #onPointerUp(event: PointerEvent) {
+    if (
+      this.#dragTolerance.toleranceCheckElement !== null &&
+      !this.#dragTolerance.isToleranceReached
+    ) {
+      this.#resetToleranceCheckState();
+    }
+
     if (this.#draggedElement === null) return;
     // trigger drop event for touch devices
     if (event.pointerType === "touch") {
@@ -668,6 +727,9 @@ export class Redrop {
   #dragStart(event: PointerEvent, element: DraggableElement) {
     if (this.#draggedElement !== null) return;
     this.#draggedElement = element;
+
+    this.#resetToleranceCheckState();
+
     Redrop.#setAttributes(element, {
       "aria-grabbed": "true",
     });
@@ -693,8 +755,7 @@ export class Redrop {
       event,
     );
     this.#createDefaultPreview(element);
-    const { x, y } = Redrop.#getPosition(event);
-    this.#initialPosition = { x, y };
+
     this.#fireDragEvent(element, "dragstart", event);
   }
 
@@ -774,6 +835,39 @@ export class Redrop {
   }
 
   // other utility methods
+
+  #checkDragTolerance(event: PointerEvent) {
+    const {
+      modifiers: { tolerance },
+    } = Redrop.getDraggables(this, this.#dragTolerance.toleranceCheckElement).draggableOptions;
+
+    const currentTime = Date.now();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const timeDiff = currentTime - this.#dragTolerance.startTime!;
+
+    const distanceDiff = Math.sqrt(
+      (event.clientX - this.#dragTolerance.startPosition.x) ** 2 +
+        (event.clientY - this.#dragTolerance.startPosition.y) ** 2,
+    );
+
+    const isToleranceReached = tolerance.strictMatch
+      ? timeDiff > tolerance.time && distanceDiff > tolerance.distance
+      : timeDiff > tolerance.time || distanceDiff > tolerance.distance;
+
+    if (isToleranceReached) {
+      this.#dragTolerance.isToleranceReached = true;
+      if (this.#dragTolerance.toleranceCheckElement !== null) {
+        this.#dragStart(event, this.#dragTolerance.toleranceCheckElement);
+      }
+    }
+  }
+
+  #resetToleranceCheckState() {
+    this.#dragTolerance.startTime = null;
+    this.#dragTolerance.startPosition = { x: 0, y: 0 };
+    this.#dragTolerance.isToleranceReached = false;
+    this.#dragTolerance.toleranceCheckElement = null;
+  }
 
   static #setAttributes(element: Element, attributes: Record<string, string>) {
     Object.entries(attributes).forEach(([key, value]) => {
@@ -901,6 +995,7 @@ export class Redrop {
       over: null,
       data: null,
     };
+    this.#resetToleranceCheckState();
   }
 
   // eslint-disable-next-line class-methods-use-this
