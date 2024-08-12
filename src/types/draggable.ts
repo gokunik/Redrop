@@ -17,6 +17,11 @@ export type BaseDraggableType = {
       distance: number;
       strictMatch: boolean;
     };
+    cursorOffset: {
+      x: number;
+      y: number;
+      preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "auto";
+    };
   };
   accessibility: {
     role: string;

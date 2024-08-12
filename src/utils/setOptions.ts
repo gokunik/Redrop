@@ -36,6 +36,15 @@ export function setDraggableOptions(
           options?.modifiers?.tolerance?.strictMatch ??
           globalDraggableOptions?.modifiers?.tolerance?.strictMatch,
       },
+      cursorOffset: {
+        x:
+          options?.modifiers?.cursorOffset?.x ?? globalDraggableOptions?.modifiers?.cursorOffset?.x,
+        y:
+          options?.modifiers?.cursorOffset?.y ?? globalDraggableOptions?.modifiers?.cursorOffset?.y,
+        preset:
+          options?.modifiers?.cursorOffset?.preset ??
+          globalDraggableOptions?.modifiers?.cursorOffset?.preset,
+      },
     },
     accessibility: {
       role: options?.accessibility?.role ?? globalDraggableOptions?.accessibility?.role,

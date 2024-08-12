@@ -14,6 +14,11 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
       distance: 8,
       strictMatch: true,
     },
+    cursorOffset: {
+      x: 0,
+      y: 0,
+      preset: "auto",
+    },
   },
   accessibility: {
     role: "draggable",
