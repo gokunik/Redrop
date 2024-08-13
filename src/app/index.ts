@@ -1106,9 +1106,9 @@ export class Redrop {
     if (Redrop.getDraggables(this, element as Element).draggableOptions !== undefined) {
       const { draggableOptions } = Redrop.getDraggables(this, element as Element);
       if (options?.modifiers?.disabled !== undefined) {
-        if (options.modifiers.disabled) {
+        if (options.modifiers.disabled && !draggableOptions.modifiers.disabled) {
           this.#disableDraggable(element);
-        } else {
+        } else if (!options.modifiers.disabled && draggableOptions.modifiers.disabled) {
           this.#enableDraggable(element);
         }
       }
@@ -1117,9 +1117,9 @@ export class Redrop {
     } else if (Redrop.getDroppables(this, element as Element).droppableOptions !== undefined) {
       const { droppableOptions } = Redrop.getDroppables(this, element as Element);
       if (options?.modifiers?.disabled !== undefined) {
-        if (options.modifiers.disabled) {
+        if (options.modifiers.disabled && !droppableOptions.modifiers.disabled) {
           this.#disableDroppable(element);
-        } else {
+        } else if (!options.modifiers.disabled && droppableOptions.modifiers.disabled) {
           this.#enableDroppable(element);
         }
       }
