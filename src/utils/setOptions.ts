@@ -45,6 +45,8 @@ export function setDraggableOptions(
           options?.modifiers?.cursorOffset?.preset ??
           globalDraggableOptions?.modifiers?.cursorOffset?.preset,
       },
+      dragHandleClass:
+        options?.modifiers?.dragHandleClass ?? globalDraggableOptions?.modifiers?.dragHandleClass,
     },
     accessibility: {
       role: options?.accessibility?.role ?? globalDraggableOptions?.accessibility?.role,

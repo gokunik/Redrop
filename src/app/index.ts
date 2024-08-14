@@ -555,9 +555,13 @@ export class Redrop {
 
         const {
           modifiers: {
+            dragHandleClass,
             tolerance: { disabled: isDragToleranceDisabled },
           },
         } = Redrop.getDraggables(this, dragElement).draggableOptions;
+
+        const dragHandleElement = dragElement.querySelector(`.${dragHandleClass}`);
+        if (dragHandleElement !== null && !dragHandleElement.contains(event.target as Node)) return;
 
         this.#dragTolerance = {
           disabled: isDragToleranceDisabled,

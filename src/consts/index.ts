@@ -19,6 +19,7 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
       y: 0,
       preset: "auto",
     },
+    dragHandleClass: "redrop-drag-handle",
   },
   accessibility: {
     role: "draggable",

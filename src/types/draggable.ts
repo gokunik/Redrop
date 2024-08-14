@@ -22,6 +22,7 @@ export type BaseDraggableType = {
       y: number;
       preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "auto";
     };
+    dragHandleClass: string;
   };
   accessibility: {
     role: string;
