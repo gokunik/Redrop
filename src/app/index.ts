@@ -616,7 +616,7 @@ export class Redrop {
 
     if (element !== null) {
       this.#lastDropElement = element;
-      if (!this.#simulatedDragEnter) {
+      if (!this.#simulatedDragEnter && !this.#lastDropElement?.contains(this.#draggedElement)) {
         this.#simulatedDragEnter = true;
         this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
       }
@@ -648,7 +648,10 @@ export class Redrop {
     if (this.#draggedElement === null) return;
     // trigger drop event for touch devices
     if (event.pointerType === "touch") {
-      if (this.#simulatedDragEnter) {
+      if (
+        this.#simulatedDragEnter &&
+        this.#lastDropElement?.contains(this.#draggedElement) === false // prevent double drop
+      ) {
         const pointerupEvent = Redrop.#createNewPointerEventWithBubbleDisabled(event, "pointerup");
         this.#lastDropElement?.dispatchEvent(pointerupEvent);
         this.#simulatedDragEnter = false;
@@ -672,15 +675,6 @@ export class Redrop {
         signal: dropEventAbortController.signal,
       },
     );
-    // dropElement.addEventListener(
-    //   "pointerdown",
-    //   (event) => {
-    //     this.#dragEnter(event, dropElement);
-    //   },
-    //   {
-    //     signal: dropEventAbortController.signal,
-    //   },
-    // );
 
     dropElement.addEventListener(
       "pointerleave",
