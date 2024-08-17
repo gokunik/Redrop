@@ -39,6 +39,10 @@ export class Redrop {
   readonly #targetDropzones: DroppableElement[];
   static #isFirstInstanceCreated: boolean;
 
+  readonly #internalState = {
+    activeCords: { x: 0, y: 0 },
+  };
+
   #dragTolerance: {
     disabled: boolean;
     startTime: number | null;
@@ -326,6 +330,16 @@ export class Redrop {
 
     Redrop.#setAttributes(dragElement, attributes);
 
+    const dragHandleElement = dragElement.querySelector(
+      `.${draggableOptions.modifiers.dragHandleClass}`,
+    ) as unknown as HTMLElement | null;
+
+    if (dragHandleElement !== null) {
+      dragHandleElement.style.touchAction = "none";
+    } else {
+      dragElement.style.touchAction = "none";
+    }
+
     if (!draggableOptions.modifiers.disabled) {
       this.#onPointerDown(dragElement);
     }
@@ -553,10 +567,15 @@ export class Redrop {
       (event) => {
         event.preventDefault();
 
+        this.#internalState.activeCords = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+
         const {
           modifiers: {
             dragHandleClass,
-            tolerance: { disabled: isDragToleranceDisabled },
+            tolerance: { disabled: isDragToleranceDisabled, time },
           },
         } = Redrop.getDraggables(this, dragElement).draggableOptions;
 
@@ -579,6 +598,9 @@ export class Redrop {
         if (isDragToleranceDisabled) {
           this.#dragStart(event, dragElement);
         } else {
+          setTimeout(() => {
+            this.#checkDragTolerance(event);
+          }, time);
           this.#checkDragTolerance(event);
         }
       },
@@ -590,6 +612,11 @@ export class Redrop {
 
   #onPointerMove(event: PointerEvent) {
     event.preventDefault();
+
+    this.#internalState.activeCords = {
+      x: event.clientX,
+      y: event.clientY,
+    };
 
     if (
       this.#dragTolerance.toleranceCheckElement !== null &&
@@ -700,7 +727,7 @@ export class Redrop {
     dropElement.addEventListener(
       "pointerup",
       (event) => {
-        if (dropElement !== this.#lastDropElement) return;
+        if (dropElement !== this.#lastDropElement || this.#draggedElement === null) return;
         this.#drop(event, dropElement);
         if (event.pointerType === "mouse") {
           dropElement.dispatchEvent(new PointerEvent("pointerleave", event));
@@ -716,9 +743,8 @@ export class Redrop {
   // ***  Drag Events  ***
   #drag(event: PointerEvent) {
     if (this.#draggedElement === null || this.#draggedPreview === null) return;
-    const { x, y } = Redrop.#getPosition(event);
 
-    this.#translateDragPreview(x, y);
+    this.#translateDragPreview();
     this.#fireDragEvent(this.#draggedElement, "drag", event);
   }
 
@@ -753,7 +779,7 @@ export class Redrop {
       event,
     );
     this.#createDefaultPreview(element);
-    this.#translateDragPreview(event.clientX, event.clientY);
+    this.#translateDragPreview();
 
     this.#fireDragEvent(element, "dragstart", event);
   }
@@ -836,6 +862,8 @@ export class Redrop {
   // other utility methods
 
   #checkDragTolerance(event: PointerEvent) {
+    if (this.#dragTolerance?.toleranceCheckElement === null) return;
+
     const {
       modifiers: { tolerance },
     } = Redrop.getDraggables(this, this.#dragTolerance.toleranceCheckElement).draggableOptions;
@@ -850,8 +878,8 @@ export class Redrop {
     );
 
     const isToleranceReached = tolerance.strictMatch
-      ? timeDiff > tolerance.time && distanceDiff > tolerance.distance
-      : timeDiff > tolerance.time || distanceDiff > tolerance.distance;
+      ? timeDiff >= tolerance.time && distanceDiff >= tolerance.distance
+      : timeDiff >= tolerance.time || distanceDiff >= tolerance.distance;
 
     if (isToleranceReached) {
       this.#dragTolerance.isToleranceReached = true;
@@ -943,11 +971,16 @@ export class Redrop {
     document.body.appendChild(preview);
   }
 
-  #translateDragPreview(x: number, y: number) {
+  #translateDragPreview(x?: number, y?: number) {
+    const cords = {
+      x: x ?? this.#internalState.activeCords.x,
+      y: y ?? this.#internalState.activeCords.y,
+    };
+
     if (this.#draggedPreview === null) return;
     this.#draggedPreview.style.transform = `translate(${
-      x - this.#initialPosition.x
-    }px, ${y - this.#initialPosition.y}px)`;
+      cords.x - this.#initialPosition.x
+    }px, ${cords.y - this.#initialPosition.y}px)`;
   }
   // #createCustomPreview() {}
 
@@ -1258,22 +1291,26 @@ export class Redrop {
   }
 
   // utility functions for disable and enable
-  #disableDraggable(element: Element) {
+  #disableDraggable(element: HTMLElement) {
     Redrop.#setAttributes(element, { draggable: "false", "aria-grabbed": "false" });
+    // eslint-disable-next-line no-param-reassign
+    element.style.touchAction = "auto";
     this.#EventAbortController.dragEvents.get(element)?.abort();
   }
 
-  #disableDroppable(element: Element) {
+  #disableDroppable(element: HTMLElement) {
     Redrop.#setAttributes(element, { "data-redrop-droppable": "false" });
     this.#EventAbortController.dropEvents.get(element)?.abort();
   }
 
-  #enableDraggable(element: Element) {
+  #enableDraggable(element: HTMLElement) {
     Redrop.#setAttributes(element, { draggable: "true" });
+    // eslint-disable-next-line no-param-reassign
+    element.style.touchAction = "none";
     this.#onPointerDown(element as DraggableElement);
   }
 
-  #enableDroppable(element: Element) {
+  #enableDroppable(element: HTMLElement) {
     Redrop.#setAttributes(element, { "data-redrop-droppable": "true" });
     this.#initDropEvents(element as DroppableElement);
   }
