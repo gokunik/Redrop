@@ -22,7 +22,22 @@ export function setDraggableOptions(
     },
     modifiers: {
       disabled: options?.modifiers?.disabled ?? globalDraggableOptions?.modifiers?.disabled,
-      dragEffect: options?.modifiers?.dragEffect ?? globalDraggableOptions?.modifiers?.dragEffect,
+      cursor: {
+        offset: {
+          x:
+            options?.modifiers?.cursor?.offset?.x ??
+            globalDraggableOptions?.modifiers?.cursor?.offset?.x,
+          y:
+            options?.modifiers?.cursor?.offset?.y ??
+            globalDraggableOptions?.modifiers?.cursor?.offset?.y,
+          preset:
+            options?.modifiers?.cursor?.offset?.preset ??
+            globalDraggableOptions?.modifiers?.cursor?.offset?.preset,
+        },
+        dragEffect:
+          options?.modifiers?.cursor?.dragEffect ??
+          globalDraggableOptions?.modifiers?.cursor?.dragEffect,
+      },
       tolerance: {
         disabled:
           options?.modifiers?.tolerance?.disabled ??
@@ -36,15 +51,7 @@ export function setDraggableOptions(
           options?.modifiers?.tolerance?.strictMatch ??
           globalDraggableOptions?.modifiers?.tolerance?.strictMatch,
       },
-      cursorOffset: {
-        x:
-          options?.modifiers?.cursorOffset?.x ?? globalDraggableOptions?.modifiers?.cursorOffset?.x,
-        y:
-          options?.modifiers?.cursorOffset?.y ?? globalDraggableOptions?.modifiers?.cursorOffset?.y,
-        preset:
-          options?.modifiers?.cursorOffset?.preset ??
-          globalDraggableOptions?.modifiers?.cursorOffset?.preset,
-      },
+
       dragHandleClass:
         options?.modifiers?.dragHandleClass ?? globalDraggableOptions?.modifiers?.dragHandleClass,
     },

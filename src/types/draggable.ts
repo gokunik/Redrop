@@ -10,17 +10,19 @@ export type BaseDraggableType = {
   };
   modifiers: {
     disabled: boolean;
-    dragEffect: "copy" | "move" | "none";
+    cursor: {
+      offset: {
+        x: number;
+        y: number;
+        preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "auto";
+      };
+      dragEffect: string;
+    };
     tolerance: {
       disabled: boolean;
       time: number;
       distance: number;
       strictMatch: boolean;
-    };
-    cursorOffset: {
-      x: number;
-      y: number;
-      preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "auto";
     };
     dragHandleClass: string;
   };

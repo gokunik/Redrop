@@ -1,3 +1,7 @@
+:root {
+  --cursor-type: grabbing;
+}
+
 .redrop-drag-preview {
   position: absolute !important;
   pointer-events: none !important;
@@ -12,29 +16,19 @@
   outline-offset: -1px;
 }
 
-.redrop-drag {
-  cursor: grab;
-}
-
-.redrop-current-draggable-effect-none,
-.redrop-current-draggable-effect-none * {
-  cursor: grabbing;
-}
-
-.redrop-current-draggable-effect-copy,
-.redrop-current-draggable-effect-copy * {
-  cursor: copy;
-}
-
-.redrop-current-draggable-effect-move,
-.redrop-current-draggable-effect-move * {
-  cursor: move;
+body.redrop-dragging,
+body.redrop-dragging * {
+  cursor: var(--cursor-type) !important;
 }
 
 .redrop-draggable-item[draggable="false"] {
   cursor: not-allowed;
 }
 
-/* .redrop-draggable-item[draggable="true"] {
-  cursor: grab;
-} */
+.redrop-draggable-item[aria-grabbed="true"] {
+  opacity: 0.5;
+}
+
+.redrop-draggable-item.redrop-drag-preview[aria-grabbed="true"] {
+  opacity: 1;
+}

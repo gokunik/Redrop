@@ -7,17 +7,19 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
   },
   modifiers: {
     disabled: false,
-    dragEffect: "copy",
+    cursor: {
+      offset: {
+        x: 0,
+        y: 0,
+        preset: "auto",
+      },
+      dragEffect: "grabbing",
+    },
     tolerance: {
       disabled: false,
       time: 200,
       distance: 8,
       strictMatch: true,
-    },
-    cursorOffset: {
-      x: 0,
-      y: 0,
-      preset: "auto",
     },
     dragHandleClass: "redrop-drag-handle",
   },

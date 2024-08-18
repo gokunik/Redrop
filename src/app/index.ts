@@ -760,11 +760,13 @@ export class Redrop {
 
     Redrop.#setAttributes(document.body, {
       "data-redrop-dragging": "true",
-      class: `${document.body.classList.toString()} redrop-current-draggable-effect-${
-        Redrop.getDraggables(this, this.#draggedElement).draggableOptions.modifiers.dragEffect ??
-        "none"
-      }`,
+      class: `${document.body.classList.toString()} redrop-dragging`,
     });
+
+    document.body.style.setProperty(
+      "--cursor-type",
+      Redrop.getDraggables(this, element).draggableOptions.modifiers.cursor.dragEffect,
+    );
 
     this.#lastDropElement = Redrop.#getDragOverElement(event);
     if (this.#lastDropElement !== null) {
@@ -897,7 +899,8 @@ export class Redrop {
   }
 
   #setCursorOffset(dragElement: DraggableElement, event: PointerEvent) {
-    const { cursorOffset } = Redrop.getDraggables(this, dragElement).draggableOptions.modifiers;
+    const { offset: cursorOffset } = Redrop.getDraggables(this, dragElement).draggableOptions
+      .modifiers.cursor;
     const { x, y } = Redrop.#getPosition(event);
     const rect = dragElement.getBoundingClientRect();
     const presetOffset = {
@@ -972,12 +975,12 @@ export class Redrop {
   }
 
   #translateDragPreview(x?: number, y?: number) {
+    if (this.#draggedPreview === null) return;
     const cords = {
       x: x ?? this.#internalState.activeCords.x,
       y: y ?? this.#internalState.activeCords.y,
     };
 
-    if (this.#draggedPreview === null) return;
     this.#draggedPreview.style.transform = `translate(${
       cords.x - this.#initialPosition.x
     }px, ${cords.y - this.#initialPosition.y}px)`;
@@ -986,12 +989,7 @@ export class Redrop {
 
   #removeDraggedPreview() {
     if (this.#draggedPreview != null && this.#draggedElement != null) {
-      document.body.classList.remove(
-        `redrop-current-draggable-effect-${
-          Redrop.getDraggables(this, this.#draggedElement).draggableOptions.modifiers.dragEffect ??
-          "none"
-        }`,
-      );
+      document.body.classList.remove("redrop-dragging");
       this.#targetDropzones.forEach((dropzone) => {
         const highlightClass = dropzone._Redrop.droppableOptions.modifiers.highlight.class;
         dropzone.classList.remove(highlightClass);
