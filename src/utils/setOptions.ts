@@ -38,6 +38,17 @@ export function setDraggableOptions(
           options?.modifiers?.cursor?.dragEffect ??
           globalDraggableOptions?.modifiers?.cursor?.dragEffect,
       },
+      dragPreview: {
+        customPreview:
+          options?.modifiers?.dragPreview?.customPreview ??
+          globalDraggableOptions?.modifiers?.dragPreview?.customPreview,
+        class:
+          options?.modifiers?.dragPreview?.class ??
+          globalDraggableOptions?.modifiers?.dragPreview?.class,
+        scale:
+          options?.modifiers?.dragPreview?.scale ??
+          globalDraggableOptions?.modifiers?.dragPreview?.scale,
+      },
       tolerance: {
         disabled:
           options?.modifiers?.tolerance?.disabled ??

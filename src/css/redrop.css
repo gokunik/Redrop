@@ -6,7 +6,6 @@
   position: absolute !important;
   pointer-events: none !important;
   z-index: 999;
-  opacity: 0.8;
   outline: 0.5px solid rgba(0, 166, 231, 0.915) !important;
   box-sizing: border-box !important;
 }
@@ -16,6 +15,7 @@
   outline-offset: -1px;
 }
 
+html,
 body.redrop-dragging,
 body.redrop-dragging * {
   cursor: var(--cursor-type) !important;

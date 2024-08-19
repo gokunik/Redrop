@@ -15,6 +15,11 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
       },
       dragEffect: "grabbing",
     },
+    dragPreview: {
+      customPreview: null,
+      class: "redrop-drag-preview",
+      scale: 0.95,
+    },
     tolerance: {
       disabled: false,
       time: 200,

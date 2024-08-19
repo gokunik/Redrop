@@ -31,7 +31,11 @@ import type {
 export class Redrop {
   readonly #globalOptions: BaseGlobalType;
   #draggedElement: DraggableElement | null;
-  #draggedPreview: HTMLElement | null;
+  #draggedPreview: {
+    element: HTMLElement | null;
+    class: string;
+    scale: number;
+  };
   #initialPosition: { x: number; y: number };
   #simulatedDragEnter: boolean = false;
   #lastDropElement: DroppableElement | null = null;
@@ -61,7 +65,11 @@ export class Redrop {
       this.#globalOptions = setGlobalOptions(initialGlobalOptions);
     }
     this.#draggedElement = null;
-    this.#draggedPreview = null;
+    this.#draggedPreview = {
+      element: null,
+      class: "redrop-drag-preview",
+      scale: 1,
+    };
     this.#initialPosition = { x: 0, y: 0 };
     this.#DndState = {
       active: null,
@@ -95,6 +103,8 @@ export class Redrop {
     window.addEventListener("contextmenu", (event) => {
       if (this.#draggedElement !== null) {
         event.preventDefault();
+      } else {
+        this.#onPointerUp(new PointerEvent("pointerup", event));
       }
     });
   }
@@ -593,8 +603,6 @@ export class Redrop {
           toleranceCheckElement: dragElement,
         };
 
-        this.#setCursorOffset(dragElement, event);
-
         if (isDragToleranceDisabled) {
           this.#dragStart(event, dragElement);
         } else {
@@ -751,6 +759,7 @@ export class Redrop {
   #dragStart(event: PointerEvent, element: DraggableElement) {
     if (this.#draggedElement !== null) return;
     this.#draggedElement = element;
+    const { draggableOptions } = Redrop.getDraggables(this, element);
 
     this.#resetToleranceCheckState();
 
@@ -763,10 +772,7 @@ export class Redrop {
       class: `${document.body.classList.toString()} redrop-dragging`,
     });
 
-    document.body.style.setProperty(
-      "--cursor-type",
-      Redrop.getDraggables(this, element).draggableOptions.modifiers.cursor.dragEffect,
-    );
+    document.body.style.setProperty("--cursor-type", draggableOptions.modifiers.cursor.dragEffect);
 
     this.#lastDropElement = Redrop.#getDragOverElement(event);
     if (this.#lastDropElement !== null) {
@@ -774,13 +780,23 @@ export class Redrop {
     }
     this.#highlightDropzones("dragmove");
 
-    this.#setActiveState(
-      element,
-      Redrop.getDraggables(this, element).draggableOptions,
-      false,
+    this.#setActiveState(element, draggableOptions, false, event);
+
+    const { customPreview: previewElement } = draggableOptions.modifiers.dragPreview;
+    this.#draggedPreview.scale = draggableOptions.modifiers.dragPreview.scale;
+    this.#draggedPreview.class = draggableOptions.modifiers.dragPreview.class;
+
+    if (previewElement !== null) {
+      this.#createCustomPreview(previewElement);
+    } else {
+      this.#createDefaultPreview(element);
+    }
+
+    this.#setCursorOffset(
+      this.#draggedPreview.element ?? this.#draggedElement,
       event,
+      draggableOptions.modifiers.cursor.offset,
     );
-    this.#createDefaultPreview(element);
     this.#translateDragPreview();
 
     this.#fireDragEvent(element, "dragstart", event);
@@ -898,19 +914,46 @@ export class Redrop {
     this.#dragTolerance.toleranceCheckElement = null;
   }
 
-  #setCursorOffset(dragElement: DraggableElement, event: PointerEvent) {
-    const { offset: cursorOffset } = Redrop.getDraggables(this, dragElement).draggableOptions
-      .modifiers.cursor;
+  #setCursorOffset(
+    dragElement: HTMLElement,
+    event: PointerEvent,
+    offset: BaseDraggableType["modifiers"]["cursor"]["offset"],
+  ) {
+    const cursorOffset = offset;
     const { x, y } = Redrop.#getPosition(event);
     const rect = dragElement.getBoundingClientRect();
+    const { scale } = this.#draggedPreview;
+
+    const adjustRect: (value: number) => number = (value) => value + (value - value / scale);
+    const adjustedRect = {
+      left: rect.left / scale,
+      right: adjustRect(rect.right),
+      top: adjustRect(rect.top),
+      bottom: adjustRect(rect.bottom),
+      width: adjustRect(rect.width),
+      height: adjustRect(rect.height),
+    };
+
     const presetOffset = {
-      "top-left": { x: rect.left - cursorOffset.x, y: rect.top - cursorOffset.y },
-      "top-right": { x: rect.right + cursorOffset.x, y: rect.top - cursorOffset.y },
-      "bottom-left": { x: rect.left - cursorOffset.x, y: rect.bottom + cursorOffset.y },
-      "bottom-right": { x: rect.right + cursorOffset.x, y: rect.bottom + cursorOffset.y },
+      "top-left": {
+        x: adjustedRect.left - cursorOffset.x,
+        y: adjustedRect.top - cursorOffset.y,
+      },
+      "top-right": {
+        x: adjustedRect.right + cursorOffset.x,
+        y: adjustedRect.top - cursorOffset.y,
+      },
+      "bottom-left": {
+        x: adjustedRect.left - cursorOffset.x,
+        y: adjustedRect.bottom + cursorOffset.y,
+      },
+      "bottom-right": {
+        x: adjustedRect.right + cursorOffset.x,
+        y: adjustedRect.bottom + cursorOffset.y,
+      },
       center: {
-        x: rect.left + rect.width / 2 + cursorOffset.x,
-        y: rect.top + rect.height / 2 + cursorOffset.y,
+        x: adjustedRect.left + adjustedRect.width / 2 + cursorOffset.x - 4,
+        y: adjustedRect.top + adjustedRect.height / 2 + cursorOffset.y - 2,
       },
     };
 
@@ -960,12 +1003,14 @@ export class Redrop {
   }
 
   #createDefaultPreview(element: DraggableElement) {
-    this.#draggedPreview = element.cloneNode(true) as HTMLElement;
+    this.#draggedPreview.element = element.cloneNode(true) as HTMLElement;
 
-    const preview = this.#draggedPreview;
+    const preview = this.#draggedPreview.element;
+    preview.id = `redrop-drag-preview-${preview.id}`;
     preview.classList.add(
       "redrop-drag-preview",
-      `redrop--drag-preview-${element._Redrop.draggableOptions.identifier.type}`,
+      "redrop-default-drag-preview",
+      this.#draggedPreview.class,
     );
     preview.style.width = `${element.getBoundingClientRect().width}px`;
     preview.style.height = `${element.getBoundingClientRect().height}px`;
@@ -974,21 +1019,39 @@ export class Redrop {
     document.body.appendChild(preview);
   }
 
+  #createCustomPreview(element: HTMLElement | ((element: DraggableElement) => HTMLElement)) {
+    if (this.#draggedElement === null || element === null) return;
+    if (typeof element === "function") {
+      this.#draggedPreview.element = element(this.#draggedElement);
+    } else {
+      this.#draggedPreview.element = element;
+    }
+
+    const preview = this.#draggedPreview.element;
+    preview.classList.add("redrop-drag-preview", this.#draggedPreview.class);
+    preview.style.left = `${this.#draggedElement?.getBoundingClientRect().left}px`;
+    preview.style.top = `${this.#draggedElement?.getBoundingClientRect().top}px`;
+    document.body.appendChild(preview);
+  }
+
   #translateDragPreview(x?: number, y?: number) {
-    if (this.#draggedPreview === null) return;
+    if (this.#draggedPreview.element === null) return;
     const cords = {
       x: x ?? this.#internalState.activeCords.x,
       y: y ?? this.#internalState.activeCords.y,
     };
 
-    this.#draggedPreview.style.transform = `translate(${
-      cords.x - this.#initialPosition.x
-    }px, ${cords.y - this.#initialPosition.y}px)`;
+    const initialX = this.#initialPosition.x / this.#draggedPreview.scale;
+    const initialY = this.#initialPosition.y / this.#draggedPreview.scale;
+
+    this.#draggedPreview.element.style.transform = `translate(
+    ${cords.x - initialX}px, 
+    ${cords.y - initialY}px) 
+    scale(${this.#draggedPreview.scale})`;
   }
-  // #createCustomPreview() {}
 
   #removeDraggedPreview() {
-    if (this.#draggedPreview != null && this.#draggedElement != null) {
+    if (this.#draggedPreview.element != null && this.#draggedElement != null) {
       document.body.classList.remove("redrop-dragging");
       this.#targetDropzones.forEach((dropzone) => {
         const highlightClass = dropzone._Redrop.droppableOptions.modifiers.highlight.class;
@@ -997,8 +1060,12 @@ export class Redrop {
       Redrop.#setAttributes(document.body, {
         "data-redrop-dragging": "false",
       });
-      document.body.removeChild(this.#draggedPreview);
-      this.#draggedPreview = null;
+      document.body.removeChild(this.#draggedPreview.element);
+      this.#draggedPreview = {
+        element: null,
+        scale: 1,
+        class: "redrop-drag-preview",
+      };
       Redrop.#setAttributes(this.#draggedElement, {
         "aria-grabbed": "false",
       });
