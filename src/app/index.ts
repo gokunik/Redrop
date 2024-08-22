@@ -1038,7 +1038,7 @@ export class Redrop {
     if (typeof element === "function") {
       this.#draggedPreview.element = element(this.#draggedElement);
     } else {
-      this.#draggedPreview.element = element;
+      this.#draggedPreview.element = element.cloneNode(true) as HTMLElement;
     }
 
     const preview = this.#draggedPreview.element;
