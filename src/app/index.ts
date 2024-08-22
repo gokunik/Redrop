@@ -47,6 +47,8 @@ export class Redrop {
     activeCords: { x: 0, y: 0 },
   };
 
+  readonly #elementIds: Record<string, HTMLElement> = {};
+
   #dragTolerance: {
     disabled: boolean;
     startTime: number | null;
@@ -303,6 +305,12 @@ export class Redrop {
       draggableOptions.identifier.id = randomId;
     }
 
+    if (this.#elementIds[draggableOptions.identifier.id] !== undefined) {
+      throw new Error(`Duplicate draggable id: ${draggableOptions.identifier.id}`);
+    } else {
+      this.#elementIds[draggableOptions.identifier.id] = element;
+    }
+
     const dragElement = element as DraggableElement;
 
     const redropProps = {
@@ -378,6 +386,12 @@ export class Redrop {
     if (droppableOptions.identifier.id === "") {
       const randomId = `${Date.now().toString(36) + Math.random().toString(36).slice(2)}`;
       droppableOptions.identifier.id = randomId;
+    }
+
+    if (this.#elementIds[droppableOptions.identifier.id] !== undefined) {
+      throw new Error(`Duplicate draggable id: ${droppableOptions.identifier.id}`);
+    } else {
+      this.#elementIds[droppableOptions.identifier.id] = element;
     }
 
     const dropElement = element as DroppableElement;
