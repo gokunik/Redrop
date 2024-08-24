@@ -157,6 +157,9 @@ export class Redrop {
       return draggables;
     }
 
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!Redrop.#draggables.get(instance)?.has(element)) return undefined;
+
     return {
       draggableOptions: Redrop.#draggables.get(instance)?.get(element),
       element,
@@ -181,6 +184,9 @@ export class Redrop {
       });
       return droppables;
     }
+
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!Redrop.#droppables.get(instance)?.has(element)) return undefined;
 
     return {
       droppableOptions: Redrop.#droppables.get(instance)?.get(element),
@@ -286,13 +292,13 @@ export class Redrop {
   makeDraggable(element: Element | string | null, options?: DraggableOptions) {
     if (typeof element === "string") {
       const elementSelector = document.querySelector(element);
-
       element = elementSelector as DraggableElement;
     }
 
     if (element === null) {
       throw new Error("Draggable element cannot be null");
     }
+    if (Redrop.getDraggables(this, element) !== undefined) return element as DraggableElement;
 
     if (!(element instanceof HTMLElement)) {
       console.error("Draggable element not valid: ", element);
@@ -375,6 +381,8 @@ export class Redrop {
       console.error("Droppable element not valid: ", element);
       throw new Error("Droppable element must be an instance of HTMLElement");
     }
+
+    if (Redrop.getDroppables(this, element) !== undefined) return element as DroppableElement;
 
     const droppableOptions = setDroppableOptions(this.#globalOptions.droppableOptions, options);
     droppableOptions.modifiers.disabled = false;
@@ -655,6 +663,8 @@ export class Redrop {
     } else if (type === "droppable") {
       this.#makeUnDroppable(element as DroppableElement);
     }
+
+    return element;
   }
 
   // initiase mutation observer
@@ -837,6 +847,7 @@ export class Redrop {
     dropElement.addEventListener(
       "pointermove",
       (event) => {
+        if (this.#draggedElement === null) return;
         this.#lastDropElement = dropElement;
         this.#dragOver(event, dropElement);
       },
