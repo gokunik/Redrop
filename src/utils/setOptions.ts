@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import type {
   BaseDraggableType,
   BaseDroppableType,
@@ -13,7 +14,14 @@ export function setDraggableOptions(
   options?: DraggableOptions,
 ): BaseDraggableType {
   if (options === undefined) {
-    return structuredClone(globalDraggableOptions);
+    const { customPreview } = globalDraggableOptions.modifiers.dragPreview;
+    if (customPreview !== null) {
+      globalDraggableOptions.modifiers.dragPreview.customPreview = null;
+    }
+    const finalOptions = structuredClone(globalDraggableOptions);
+    finalOptions.modifiers.dragPreview.customPreview = customPreview;
+    globalDraggableOptions.modifiers.dragPreview.customPreview = customPreview;
+    return finalOptions;
   }
   return {
     identifier: {

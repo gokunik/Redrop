@@ -1,5 +1,5 @@
 :root {
-  --cursor-type: grabbing;
+  --cursor-type: auto;
 }
 
 .redrop-drag-preview {
