@@ -57,3 +57,14 @@ export type DraggableInfo = {
   draggableOptions: BaseDraggableType;
   element: DraggableElement;
 };
+
+export type TransferOptions = {
+  action: "copy" | "move";
+  position: "prepend" | "append" | "index";
+  index: number | null;
+  makeDraggable: boolean;
+  reActivate: boolean;
+  reuseOptions: boolean;
+  reuseListeners: boolean;
+  options: DraggableOptions;
+};

@@ -1,4 +1,9 @@
-import type { BaseDraggableType, BaseDroppableType, BaseGlobalType } from "@/types/index.ts";
+import type {
+  BaseDraggableType,
+  BaseDroppableType,
+  BaseGlobalType,
+  TransferOptions,
+} from "@/types/index.ts";
 
 export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
   identifier: {
@@ -57,3 +62,14 @@ export const DEFAULT_GLOBAL_OPTIONS: BaseGlobalType = {
   draggableOptions: DEFAULT_DRAGGABLE_OPTIONS,
   droppableOptions: DEFAULT_DROPPABLE_OPTIONS,
 };
+
+export const TRANSFER_OPTIONS: TransferOptions = {
+  action: "copy",
+  position: "append",
+  index: null,
+  makeDraggable: false,
+  reActivate: true,
+  reuseOptions: false,
+  reuseListeners: false,
+  options: DEFAULT_DRAGGABLE_OPTIONS,
+} as const;
