@@ -51,6 +51,7 @@ export class Redrop {
 
   readonly #internalState = {
     activeCords: { x: 0, y: 0 },
+    initialCords: { x: 0, y: 0 },
   };
 
   readonly #elementIds: Record<string, HTMLElement> = {};
@@ -854,6 +855,11 @@ export class Redrop {
           y: event.clientY,
         };
 
+        this.#internalState.initialCords = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+
         const {
           modifiers: {
             dragHandleClass,
@@ -1193,9 +1199,11 @@ export class Redrop {
     offset: BaseDraggableType["modifiers"]["cursor"]["offset"],
   ) {
     const cursorOffset = offset;
-    const { x, y } = Redrop.#getPosition(event);
     const rect = dragElement.getBoundingClientRect();
     const { scale } = this.#draggedPreview;
+
+    const clickX = this.#internalState.initialCords.x - rect.left;
+    const clickY = this.#internalState.initialCords.y - rect.top;
 
     const adjustRect: (value: number) => number = (value) => value + (value - value / scale);
     const adjustedRect = {
@@ -1228,13 +1236,13 @@ export class Redrop {
         x: adjustedRect.left + adjustedRect.width / 2 + cursorOffset.x - 4,
         y: adjustedRect.top + adjustedRect.height / 2 + cursorOffset.y - 2,
       },
+      auto: {
+        x: adjustedRect.left + clickX + cursorOffset.x,
+        y: adjustedRect.top + clickY + cursorOffset.y,
+      },
     };
 
-    if (cursorOffset.preset !== "auto") {
-      this.#initialPosition = presetOffset[cursorOffset.preset];
-    } else if (cursorOffset.preset === "auto") {
-      this.#initialPosition = { x: x - cursorOffset.x, y: y - cursorOffset.y };
-    }
+    this.#initialPosition = presetOffset[cursorOffset.preset];
   }
 
   static #setAttributes(element: Element, attributes: Record<string, string>) {
