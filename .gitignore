@@ -27,3 +27,4 @@ dist-ssr
 # development files
 index.html
 main.ts
+testingUtility.ts
