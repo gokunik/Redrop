@@ -22,6 +22,7 @@ module.exports = {
     "vite.config.ts",
     "commitlint.config.cjs",
     "src/css/*.css",
+    "testingUtility.ts",
   ],
   parserOptions: {
     ecmaVersion: "latest",
