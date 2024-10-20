@@ -1195,7 +1195,7 @@ export class Redrop {
 
   #setCursorOffset(
     dragElement: HTMLElement,
-    event: PointerEvent,
+    _event: PointerEvent,
     offset: BaseDraggableType["modifiers"]["cursor"]["offset"],
   ) {
     const cursorOffset = offset;
@@ -1359,6 +1359,7 @@ export class Redrop {
     }
   }
 
+  // @ts-expect-error currently unused
   static #getPosition(event: PointerEvent) {
     return { x: event.clientX, y: event.clientY };
   }
