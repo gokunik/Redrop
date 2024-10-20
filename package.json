@@ -34,7 +34,7 @@
     "dev:host": "vite --host",
     "build": "tsc && vite build",
     "build:safe": "npm run format && npm run lint && npm run build",
-    "prepush:safe": "git stash --include-untracked --quiet && (npm run build:safe && echo 'Build successful' && git stash pop --quiet && exit 0) || (echo 'Build failed' && git stash pop --quiet && exit 1)",
+    "prepush:safe": "./prepush.sh",
     "preview": "vite preview",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*' --ignore-unknown",
