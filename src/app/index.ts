@@ -33,6 +33,7 @@ import type {
   EventAbortController,
   TransferOptions,
 } from "@/types/index.ts";
+import { scaleRect } from "@/utils/scaleRect";
 
 export class Redrop {
   readonly #globalOptions: BaseGlobalType;
@@ -1073,7 +1074,6 @@ export class Redrop {
 
     this.#setCursorOffset(
       this.#draggedPreview.element ?? this.#draggedElement,
-      event,
       draggableOptions.modifiers.cursor.offset,
     );
     this.#translateDragPreview();
@@ -1195,50 +1195,46 @@ export class Redrop {
 
   #setCursorOffset(
     dragElement: HTMLElement,
-    _event: PointerEvent,
     offset: BaseDraggableType["modifiers"]["cursor"]["offset"],
   ) {
     const cursorOffset = offset;
-    const rect = dragElement.getBoundingClientRect();
     const { scale } = this.#draggedPreview;
-
-    const clickX = this.#internalState.initialCords.x - rect.left;
-    const clickY = this.#internalState.initialCords.y - rect.top;
-
-    const adjustRect: (value: number) => number = (value) => value + (value - value / scale);
-    const adjustedRect = {
-      left: rect.left / scale,
-      right: adjustRect(rect.right),
-      top: adjustRect(rect.top),
-      bottom: adjustRect(rect.bottom),
-      width: adjustRect(rect.width),
-      height: adjustRect(rect.height),
-    };
+    const rect = dragElement.getBoundingClientRect();
+    const scaledRect = scaleRect(rect, scale);
+    const { x: initialX, y: initialY } = this.#internalState.initialCords;
 
     const presetOffset = {
       "top-left": {
-        x: adjustedRect.left - cursorOffset.x,
-        y: adjustedRect.top - cursorOffset.y,
+        x: initialX + (scaledRect.left - initialX) - cursorOffset.x,
+        y: initialY + (scaledRect.top - initialY) - cursorOffset.y,
       },
       "top-right": {
-        x: adjustedRect.right + cursorOffset.x,
-        y: adjustedRect.top - cursorOffset.y,
+        x: initialX + (scaledRect.right - initialX) + cursorOffset.x,
+        y: initialY + (scaledRect.top - initialY) - cursorOffset.y,
       },
       "bottom-left": {
-        x: adjustedRect.left - cursorOffset.x,
-        y: adjustedRect.bottom + cursorOffset.y,
+        x: initialX + (scaledRect.left - initialX) - cursorOffset.x,
+        y: initialY + (scaledRect.bottom - initialY) + cursorOffset.y,
       },
       "bottom-right": {
-        x: adjustedRect.right + cursorOffset.x,
-        y: adjustedRect.bottom + cursorOffset.y,
+        x: initialX + (scaledRect.right - initialX) + cursorOffset.x,
+        y: initialY + (scaledRect.bottom - initialY) + cursorOffset.y,
       },
       center: {
-        x: adjustedRect.left + adjustedRect.width / 2 + cursorOffset.x - 4,
-        y: adjustedRect.top + adjustedRect.height / 2 + cursorOffset.y - 2,
+        x: scaledRect.left + scaledRect.width / 2 + cursorOffset.x,
+        y: scaledRect.top + scaledRect.height / 2 + cursorOffset.y,
       },
       auto: {
-        x: adjustedRect.left + clickX + cursorOffset.x,
-        y: adjustedRect.top + clickY + cursorOffset.y,
+        x:
+          initialX +
+          (scaledRect.right - initialX) +
+          (initialX - rect.right) * scale -
+          cursorOffset.x,
+        y:
+          initialY +
+          (scaledRect.bottom - initialY) +
+          (initialY - rect.bottom) * scale -
+          cursorOffset.y,
       },
     };
 
@@ -1328,8 +1324,8 @@ export class Redrop {
       y: y ?? this.#internalState.activeCords.y,
     };
 
-    const initialX = this.#initialPosition.x / this.#draggedPreview.scale;
-    const initialY = this.#initialPosition.y / this.#draggedPreview.scale;
+    const initialX = this.#initialPosition.x;
+    const initialY = this.#initialPosition.y;
 
     this.#draggedPreview.element.style.transform = `translate(
     ${cords.x - initialX}px, 
