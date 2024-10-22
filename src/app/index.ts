@@ -46,6 +46,7 @@ export class Redrop {
   #initialPosition: { x: number; y: number };
   #simulatedDragEnter: boolean = false;
   #lastDropElement: DroppableElement | null = null;
+  #lastDropzone: DroppableElement | null = null;
   #DndState: DndState;
   readonly #targetDropzones: DroppableElement[];
   static #isFirstInstanceCreated: boolean;
@@ -930,8 +931,14 @@ export class Redrop {
 
     if (element !== null) {
       this.#lastDropElement = element;
-      if (!this.#simulatedDragEnter && !this.#lastDropElement?.contains(this.#draggedElement)) {
-        this.#simulatedDragEnter = true;
+      if (
+        !this.#simulatedDragEnter ||
+        (this.#lastDropElement !== this.#lastDropzone && this.#lastDropzone !== null)
+      ) {
+        if (this.#lastDropElement !== this.#lastDropzone) {
+          this.#lastDropzone?.dispatchEvent(new PointerEvent("pointerleave", event));
+          this.#lastDropzone = this.#lastDropElement;
+        }
         this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
       }
 
@@ -962,10 +969,7 @@ export class Redrop {
     if (this.#draggedElement === null) return;
     // trigger drop event for touch devices
     if (event.pointerType === "touch") {
-      if (
-        this.#simulatedDragEnter &&
-        this.#lastDropElement?.contains(this.#draggedElement) === false // prevent double drop
-      ) {
+      if (this.#simulatedDragEnter) {
         const pointerupEvent = Redrop.#createNewPointerEventWithBubbleDisabled(event, "pointerup");
         this.#lastDropElement?.dispatchEvent(pointerupEvent);
         this.#simulatedDragEnter = false;
@@ -983,6 +987,8 @@ export class Redrop {
     dropElement.addEventListener(
       "pointerenter",
       (event) => {
+        this.#simulatedDragEnter = true;
+        this.#lastDropzone = dropElement;
         this.#dragEnter(event, dropElement);
       },
       {
@@ -1004,7 +1010,6 @@ export class Redrop {
       "pointermove",
       (event) => {
         if (this.#draggedElement === null) return;
-        this.#lastDropElement = dropElement;
         this.#dragOver(event, dropElement);
       },
       {
@@ -1136,7 +1141,7 @@ export class Redrop {
     if (this.#isDropEventAllowed(false, dropElement)) return;
 
     if (
-      this.#lastDropElement === dropElement &&
+      this.#lastDropzone === dropElement &&
       Redrop.getDroppables(this, dropElement).droppableOptions.modifiers.highlight.on === "dragover"
     ) {
       this.#targetDropzones.forEach((dropzone) => {

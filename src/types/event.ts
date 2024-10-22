@@ -12,14 +12,22 @@ export type EventAbortController = {
 export type DragEventName = "drag" | "dragstart" | "dragend";
 export type DropEventName = "dragenter" | "dragleave" | "dragover" | "drop";
 
-export type DragEventCallback = (event: Event, state: DndState, element: DraggableElement) => void;
+export type DragEventCallback = (
+  event: PointerEvent,
+  state: DndState,
+  element: DraggableElement,
+) => void;
 export type DragListeners = {
   drag: Map<Element, DragEventCallback[]>;
   dragstart: Map<Element, DragEventCallback[]>;
   dragend: Map<Element, DragEventCallback[]>;
 };
 
-export type DropEventCallback = (event: Event, state: DndState, element: DroppableElement) => void;
+export type DropEventCallback = (
+  event: PointerEvent,
+  state: DndState,
+  element: DroppableElement,
+) => void;
 export type DropListeners = {
   dragenter: Map<Element, DropEventCallback[]>;
   dragleave: Map<Element, DropEventCallback[]>;
