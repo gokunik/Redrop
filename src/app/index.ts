@@ -1,10 +1,4 @@
 /* eslint-disable no-param-reassign */
-import {
-  DEFAULT_DRAGGABLE_OPTIONS,
-  DEFAULT_GLOBAL_OPTIONS,
-  TRANSFER_OPTIONS,
-} from "@/consts/index.ts";
-import { setDraggableOptions, setDroppableOptions, setGlobalOptions } from "@/utils/setOptions.ts";
 import type {
   DndState,
   SetState,
@@ -32,8 +26,14 @@ import type {
   DraggableElements,
   EventAbortController,
   TransferOptions,
+  GetDragOverElement,
 } from "@/types/index.ts";
-import { scaleRect } from "@/utils/scaleRect";
+import {
+  DEFAULT_DRAGGABLE_OPTIONS,
+  DEFAULT_GLOBAL_OPTIONS,
+  TRANSFER_OPTIONS,
+} from "@/consts/index.ts";
+import { setDraggableOptions, setDroppableOptions, setGlobalOptions, scaleRect } from "@/utils";
 
 export class Redrop {
   readonly #globalOptions: BaseGlobalType;
@@ -43,6 +43,12 @@ export class Redrop {
     class: string;
     scale: number;
   };
+  readonly #draggedElementState: {
+    initialContainer: DroppableElement | null;
+    index: number | null;
+    sortedIndex: number | null;
+  };
+  #ghostImage: DraggableElement | null;
   #initialPosition: { x: number; y: number };
   #simulatedDragEnter: boolean = false;
   #lastDropElement: DroppableElement | null = null;
@@ -81,6 +87,12 @@ export class Redrop {
       class: "redrop-drag-preview",
       scale: 1,
     };
+    this.#draggedElementState = {
+      initialContainer: null,
+      index: null,
+      sortedIndex: null,
+    };
+    this.#ghostImage = null;
     this.#initialPosition = { x: 0, y: 0 };
     this.#DndState = {
       active: null,
@@ -291,7 +303,9 @@ export class Redrop {
   #fireDropEvent(element: DroppableElement, eventName: DropEventName, eventData: PointerEvent) {
     if (this.#dropListeners[eventName].has(element)) {
       this.#dropListeners[eventName].get(element)?.forEach((callback) => {
-        callback(eventData, this.#DndState, element);
+        if (eventName === "drop") {
+          callback(eventData, this.#DndState, element, this.#draggedElementState.sortedIndex);
+        } else callback(eventData, this.#DndState, element);
       });
     }
   }
@@ -416,11 +430,13 @@ export class Redrop {
     } else if (options.position === "index") {
       if (options.index === null) {
         throw new Error("Index not provided for transfering element");
-      } else if (options.index > targetContainer.children.length) {
+      } else if (options.index > targetContainer.children.length || options.index < 0) {
         throw new Error("Index out of bounds for transfering element");
       }
       targetContainer.insertBefore(transferElm, targetContainer.children[options.index]);
     }
+
+    return transferElm;
   }
 
   // for making elements draggable and droppable
@@ -862,6 +878,11 @@ export class Redrop {
           y: event.clientY,
         };
 
+        this.#draggedElementState.initialContainer = this.#lastDropElement;
+        this.#draggedElementState.index = Array.from(this.#lastDropElement?.children ?? []).indexOf(
+          (this.#draggedElement as Element) ?? null,
+        );
+
         const {
           modifiers: {
             dragHandleClass,
@@ -927,7 +948,7 @@ export class Redrop {
   }
 
   #onTouchMove(event: PointerEvent) {
-    const element = Redrop.#getDragOverElement(event);
+    const element = Redrop.#getDragOverElement(event, "drop");
 
     if (element !== null) {
       this.#lastDropElement = element;
@@ -953,9 +974,15 @@ export class Redrop {
     }
   }
 
-  static #getDragOverElement(event: PointerEvent) {
-    const elements = document.elementsFromPoint(event.clientX, event.clientY) as DroppableElements;
-    return elements.find((elm) => elm.hasAttribute("data-redrop-droppable")) ?? null;
+  static #getDragOverElement<T extends keyof GetDragOverElement>(
+    event: PointerEvent,
+    type: T,
+  ): GetDragOverElement[T] | null {
+    const dataAttribute = type === "drag" ? "data-redrop-drag-id" : "data-redrop-droppable";
+    const elements = document.elementsFromPoint(event.clientX, event.clientY);
+    return (
+      elements.find((elm): elm is GetDragOverElement[T] => elm.hasAttribute(dataAttribute)) ?? null
+    );
   }
 
   #onPointerUp(event: PointerEvent) {
@@ -975,6 +1002,22 @@ export class Redrop {
         this.#simulatedDragEnter = false;
       }
     }
+
+    const elmUnderCursor = Redrop.#getDragOverElement(event, "drop");
+
+    const { autoRemove } = Redrop.getDraggables(this, this.#draggedElement).draggableOptions
+      .modifiers;
+    if (!autoRemove && elmUnderCursor === null) {
+      const container = this.#draggedElementState.initialContainer;
+      const nodeRef =
+        container?.children[this.#draggedElementState.index ?? Number.POSITIVE_INFINITY];
+
+      if (this.#draggedElementState.index === (container?.childElementCount ?? 0)) {
+        container?.appendChild(this.#draggedElement);
+      } else if (nodeRef !== undefined) {
+        container?.insertBefore(this.#draggedElement, nodeRef);
+      }
+    }
     this.#dragEnd(event);
     this.#resetDndState();
   }
@@ -987,8 +1030,24 @@ export class Redrop {
     dropElement.addEventListener(
       "pointerenter",
       (event) => {
+        if (this.#draggedElement === null) return;
         this.#simulatedDragEnter = true;
         this.#lastDropzone = dropElement;
+
+        const isGhostEnabled = Redrop.getDraggables(this, this.#draggedElement).draggableOptions
+          .modifiers.dragPreview.ghost;
+
+        const { sorting } = Redrop.getDroppables(this, dropElement).droppableOptions.modifiers;
+        if ((isGhostEnabled || sorting.isEnabled) && !dropElement.contains(this.#draggedElement)) {
+          // this.#ghostImage = this.#draggedElement.cloneNode(true) as DraggableElement;
+          this.#ghostImage = this.#draggedElement;
+          dropElement.appendChild(this.#ghostImage);
+        } else if (
+          (isGhostEnabled || sorting.isEnabled) &&
+          dropElement.contains(this.#draggedElement)
+        ) {
+          this.#ghostImage = this.#draggedElement;
+        }
         this.#dragEnter(event, dropElement);
       },
       {
@@ -999,6 +1058,17 @@ export class Redrop {
     dropElement.addEventListener(
       "pointerleave",
       (event) => {
+        if (this.#draggedElement === null) return;
+        if (
+          this.#ghostImage !== null &&
+          this.#draggedElement !== this.#ghostImage &&
+          dropElement.contains(this.#ghostImage)
+        ) {
+          dropElement.removeChild(this.#ghostImage);
+        } else if (this.#ghostImage !== null && this.#draggedElement === this.#ghostImage) {
+          this.#ghostImage = null;
+          dropElement.removeChild(this.#draggedElement);
+        }
         this.#dragLeave(event, dropElement);
       },
       {
@@ -1010,7 +1080,12 @@ export class Redrop {
       "pointermove",
       (event) => {
         if (this.#draggedElement === null) return;
-        this.#dragOver(event, dropElement);
+        if (event.pointerType === "touch") {
+          const element = Redrop.#getDragOverElement(event, "drop");
+          if (element !== null) {
+            this.#dragOver(event, element);
+          }
+        } else this.#dragOver(event, dropElement);
       },
       {
         signal: dropEventAbortController.signal,
@@ -1021,10 +1096,10 @@ export class Redrop {
       "pointerup",
       (event) => {
         if (dropElement !== this.#lastDropElement || this.#draggedElement === null) return;
+        this.#ghostImage = null;
+
         this.#drop(event, dropElement);
-        if (event.pointerType === "mouse") {
-          dropElement.dispatchEvent(new PointerEvent("pointerleave", event));
-        }
+        dropElement.dispatchEvent(new PointerEvent("pointerleave", event));
       },
       {
         signal: dropEventAbortController.signal,
@@ -1058,13 +1133,7 @@ export class Redrop {
     });
 
     document.body.style.setProperty("--cursor-type", draggableOptions.modifiers.cursor.dragEffect);
-
-    this.#lastDropElement = Redrop.#getDragOverElement(event);
-    if (this.#lastDropElement !== null) {
-      this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
-    }
     this.#highlightDropzones("dragmove");
-
     this.#setActiveState(element, draggableOptions, false, event);
 
     const { customPreview: previewElement } = draggableOptions.modifiers.dragPreview;
@@ -1084,6 +1153,9 @@ export class Redrop {
     this.#translateDragPreview();
 
     this.#fireDragEvent(element, "dragstart", event);
+    if (this.#lastDropElement !== null) {
+      this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
+    }
   }
 
   #dragEnd(event: PointerEvent) {
@@ -1133,6 +1205,7 @@ export class Redrop {
   #dragOver(event: PointerEvent, dropElement: DroppableElement) {
     if (this.#draggedElement === null) return;
     if (this.#isDropEventAllowed(false, dropElement)) return;
+    this.#sortElements(dropElement, event);
     this.#fireDropEvent(dropElement, "dragover", event);
   }
 
@@ -1162,6 +1235,36 @@ export class Redrop {
   }
 
   // other utility methods
+
+  #sortElements(dropElement: DroppableElement, event: PointerEvent) {
+    const { sorting } = Redrop.getDroppables(this, dropElement).droppableOptions.modifiers;
+    if (sorting.isEnabled) {
+      const elmUnderCursor = Redrop.#getDragOverElement(event, "drag");
+
+      if (elmUnderCursor !== null) {
+        const elmIndex = Array.from(dropElement.children).indexOf(elmUnderCursor);
+        this.#draggedElementState.sortedIndex = elmIndex;
+
+        if (sorting.action === "highlight") {
+          Array.from(dropElement.children).forEach((elm) => {
+            if (elm === elmUnderCursor && elmUnderCursor !== this.#ghostImage) {
+              elmUnderCursor.classList.add("redrop-highlight-draggable-when-sorting");
+            } else {
+              elm.classList.remove("redrop-highlight-draggable-when-sorting");
+            }
+          });
+        } else if (sorting.action === "swap") {
+          if (this.#ghostImage !== null) {
+            if (dropElement.children[elmIndex - 1] !== this.#ghostImage) {
+              dropElement.insertBefore(this.#ghostImage, elmUnderCursor);
+            } else if (dropElement.children[elmIndex - 1] === this.#ghostImage) {
+              dropElement.insertBefore(elmUnderCursor, this.#ghostImage);
+            }
+          }
+        }
+      }
+    }
+  }
 
   #checkDragTolerance(event: PointerEvent) {
     if (this.#dragTolerance?.toleranceCheckElement === null) return;

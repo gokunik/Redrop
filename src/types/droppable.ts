@@ -18,6 +18,11 @@ export type BaseDroppableType = {
   };
   modifiers: {
     disabled: boolean;
+    sorting: {
+      isEnabled: boolean;
+      action: "swap" | "highlight";
+      highlightClass: string;
+    };
     highlight: {
       on: "dragmove" | "dragover" | "none";
       class: string;

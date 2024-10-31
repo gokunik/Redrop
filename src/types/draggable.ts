@@ -18,8 +18,10 @@ export type BaseDraggableType = {
       };
       dragEffect: string;
     };
+    autoRemove: boolean;
     dragPreview: {
       customPreview: HTMLElement | ((element?: DraggableElement) => HTMLElement) | null;
+      ghost: boolean;
       class: string;
       scale: number;
     };

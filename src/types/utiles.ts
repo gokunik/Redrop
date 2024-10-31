@@ -1,5 +1,8 @@
 // type utils
 
+import { type DraggableElement } from "./draggable";
+import { type DroppableElement } from "./droppable";
+
 // make all properties required in the object
 export type RecursiveRequired<T> = Required<{
   [P in keyof T]: T[P] extends object | undefined ? RecursiveRequired<Required<T[P]>> : T[P];
@@ -28,3 +31,8 @@ export type RecursiveAtLeastOne<T> = T extends object
       [K in keyof T]: T[K] extends object ? RecursiveAtLeastOne<T[K]> : T[K];
     }>
   : T;
+
+export type GetDragOverElement = {
+  drag: DraggableElement;
+  drop: DroppableElement;
+};

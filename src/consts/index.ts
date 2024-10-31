@@ -20,14 +20,16 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
       },
       dragEffect: "grabbing",
     },
+    autoRemove: true,
     dragPreview: {
       customPreview: null,
+      ghost: true,
       class: "redrop-drag-preview",
       scale: 0.95,
     },
     tolerance: {
       disabled: false,
-      time: 200,
+      time: 100,
       distance: 8,
       strictMatch: true,
     },
@@ -50,6 +52,11 @@ export const DEFAULT_DROPPABLE_OPTIONS: BaseDroppableType = {
   },
   modifiers: {
     disabled: false,
+    sorting: {
+      isEnabled: true,
+      action: "swap",
+      highlightClass: "redrop-active-dropzone",
+    },
     highlight: {
       on: "dragover",
       class: "redrop-active-dropzone-highlight",

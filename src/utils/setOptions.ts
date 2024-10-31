@@ -46,10 +46,14 @@ export function setDraggableOptions(
           options?.modifiers?.cursor?.dragEffect ??
           globalDraggableOptions?.modifiers?.cursor?.dragEffect,
       },
+      autoRemove: options?.modifiers?.autoRemove ?? globalDraggableOptions?.modifiers?.autoRemove,
       dragPreview: {
         customPreview:
           options?.modifiers?.dragPreview?.customPreview ??
           globalDraggableOptions?.modifiers?.dragPreview?.customPreview,
+        ghost:
+          options?.modifiers?.dragPreview?.ghost ??
+          globalDraggableOptions?.modifiers?.dragPreview?.ghost,
         class:
           options?.modifiers?.dragPreview?.class ??
           globalDraggableOptions?.modifiers?.dragPreview?.class,
@@ -100,6 +104,16 @@ export function setDroppableOptions(
     },
     modifiers: {
       disabled: options?.modifiers?.disabled ?? globalDroppableOptions?.modifiers?.disabled,
+      sorting: {
+        isEnabled:
+          options?.modifiers?.sorting?.isEnabled ??
+          globalDroppableOptions?.modifiers?.sorting?.isEnabled,
+        action:
+          options?.modifiers?.sorting?.action ?? globalDroppableOptions?.modifiers?.sorting?.action,
+        highlightClass:
+          options?.modifiers?.sorting?.highlightClass ??
+          globalDroppableOptions?.modifiers?.sorting?.highlightClass,
+      },
       highlight: {
         on: options?.modifiers?.highlight?.on ?? globalDroppableOptions?.modifiers?.highlight?.on,
         class:

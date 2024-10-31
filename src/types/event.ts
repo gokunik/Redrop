@@ -27,6 +27,7 @@ export type DropEventCallback = (
   event: PointerEvent,
   state: DndState,
   element: DroppableElement,
+  sortedIndex?: number | null,
 ) => void;
 export type DropListeners = {
   dragenter: Map<Element, DropEventCallback[]>;

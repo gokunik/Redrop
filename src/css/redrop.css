@@ -32,3 +32,7 @@ body.redrop-dragging * {
 .redrop-draggable-item.redrop-drag-preview[aria-grabbed="true"] {
   opacity: 1;
 }
+
+.redrop-highlight-draggable-when-sorting {
+  outline: 2px solid rgb(128, 132, 250) !important;
+}
