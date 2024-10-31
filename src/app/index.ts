@@ -1597,9 +1597,9 @@ export class Redrop {
     if (Array.isArray(reference)) {
       if (reference.length === 0) return;
       let referenceType: "drag" | "drop";
-      if (Redrop.getDraggables(this, reference[0]).draggableOptions !== undefined) {
+      if (Redrop.getDraggables(this, reference[0])?.draggableOptions !== undefined) {
         referenceType = "drag";
-      } else if (Redrop.getDroppables(this, reference[0]).droppableOptions !== undefined) {
+      } else if (Redrop.getDroppables(this, reference[0])?.droppableOptions !== undefined) {
         referenceType = "drop";
       }
       reference.forEach((element) => {
@@ -1621,7 +1621,7 @@ export class Redrop {
     element: DraggableElement | DroppableElement,
     options: DraggableOptions | DroppableOptions,
   ) {
-    if (Redrop.getDraggables(this, element as Element).draggableOptions !== undefined) {
+    if (Redrop.getDraggables(this, element as Element)?.draggableOptions !== undefined) {
       const { draggableOptions } = Redrop.getDraggables(this, element as Element);
       if (options?.modifiers?.disabled !== undefined) {
         if (options.modifiers.disabled && !draggableOptions.modifiers.disabled) {
@@ -1632,7 +1632,7 @@ export class Redrop {
       }
       const finalOptions = setDraggableOptions(draggableOptions, options as DraggableOptions);
       Redrop.#setDraggables(this, element as DraggableElement, finalOptions);
-    } else if (Redrop.getDroppables(this, element as Element).droppableOptions !== undefined) {
+    } else if (Redrop.getDroppables(this, element as Element)?.droppableOptions !== undefined) {
       const { droppableOptions } = Redrop.getDroppables(this, element as Element);
       if (options?.modifiers?.disabled !== undefined) {
         if (options.modifiers.disabled && !droppableOptions.modifiers.disabled) {
