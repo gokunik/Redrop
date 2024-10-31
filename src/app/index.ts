@@ -878,8 +878,10 @@ export class Redrop {
           y: event.clientY,
         };
 
-        this.#draggedElementState.initialContainer = this.#lastDropElement;
-        this.#draggedElementState.index = Array.from(this.#lastDropElement?.children ?? []).indexOf(
+        const dropElement = Redrop.#getDragOverElement(event, "drop");
+
+        this.#draggedElementState.initialContainer = dropElement;
+        this.#draggedElementState.index = Array.from(dropElement?.children ?? []).indexOf(
           (this.#draggedElement as Element) ?? null,
         );
 
@@ -938,6 +940,23 @@ export class Redrop {
     if (this.#draggedElement === null) return;
     this.#drag(event);
 
+    const element = Redrop.#getDragOverElement(event, "drop");
+
+    if (element === null) {
+      this.#targetDropzones.forEach((dropzone) => {
+        if (dropzone.classList.contains("redrop-active-dropzone-highlight")) {
+          dropzone.dispatchEvent(new PointerEvent("pointerleave", event));
+        }
+      });
+    } else if (element !== null && element !== this.#lastDropElement) {
+      this.#targetDropzones.forEach((dropzone) => {
+        if (dropzone.classList.contains("redrop-active-dropzone-highlight")) {
+          dropzone.dispatchEvent(new PointerEvent("pointerleave", event));
+        }
+      });
+      element.dispatchEvent(new PointerEvent("pointerenter", event));
+    }
+
     // for mobile/touch devices we need to manually trigger pointer events
     // because in touch devices event only triggers when it took place
     // inside the element boundary so pointer enter, over, leave and drop
@@ -963,14 +982,14 @@ export class Redrop {
         this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
       }
 
-      const pointerMoveEvent = Redrop.#createNewPointerEventWithBubbleDisabled(
-        event,
-        "pointermove",
-      );
-      element.dispatchEvent(pointerMoveEvent);
+      // const pointerMoveEvent = Redrop.#createNewPointerEventWithBubbleDisabled(
+      //   event,
+      //   "pointermove",
+      // );
+      // element.dispatchEvent(pointerMoveEvent);
     } else if (this.#simulatedDragEnter) {
       this.#simulatedDragEnter = false;
-      this.#lastDropElement?.dispatchEvent(new PointerEvent("pointerleave", event));
+      // this.#lastDropElement?.dispatchEvent(new PointerEvent("pointerleave", event));
     }
   }
 
@@ -1031,9 +1050,10 @@ export class Redrop {
       "pointerenter",
       (event) => {
         if (this.#draggedElement === null) return;
+
         this.#simulatedDragEnter = true;
         this.#lastDropzone = dropElement;
-
+        this.#sortElements(dropElement, event);
         const isGhostEnabled = Redrop.getDraggables(this, this.#draggedElement).draggableOptions
           .modifiers.dragPreview.ghost;
 
@@ -1153,9 +1173,10 @@ export class Redrop {
     this.#translateDragPreview();
 
     this.#fireDragEvent(element, "dragstart", event);
-    if (this.#lastDropElement !== null) {
-      this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
-    }
+
+    this.#draggedElementState.initialContainer?.dispatchEvent(
+      new PointerEvent("pointerenter", event),
+    );
   }
 
   #dragEnd(event: PointerEvent) {
@@ -1262,6 +1283,8 @@ export class Redrop {
             }
           }
         }
+      } else if (dropElement.childElementCount === 0) {
+        this.#draggedElementState.sortedIndex = 0;
       }
     }
   }
@@ -1380,13 +1403,20 @@ export class Redrop {
         !droppableOptions.modifiers.disabled &&
         (isAcceptDropzone || isRejectDropzone)
       ) {
+        const dropzoneIncludeCheck = (dropElement: DroppableElement) => {
+          return this.#targetDropzones.includes(dropElement);
+        };
         if (highlight.on === "dragover" && this.#lastDropElement !== null) {
           if (this.#lastDropElement === dropzone.element) {
             this.#lastDropElement?.classList.add(highlight.class);
-            this.#targetDropzones.push(this.#lastDropElement);
+            if (!dropzoneIncludeCheck(this.#lastDropElement)) {
+              this.#targetDropzones.push(this.#lastDropElement);
+            }
           }
         } else {
-          this.#targetDropzones.push(dropzone.element);
+          if (!dropzoneIncludeCheck(dropzone.element)) {
+            this.#targetDropzones.push(dropzone.element);
+          }
           dropzone.element.classList.add(highlight.class);
         }
       }
