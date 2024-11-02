@@ -1521,13 +1521,13 @@ export class Redrop {
 
   // note: manually triggered pointermove event should not bubble because it will again trigger the global
   // pointermove which will again call this function and create an infinite loop
-  static #createNewPointerEventWithBubbleDisabled(event: PointerEvent, eventName: string) {
-    const eventOptions = event;
-    Object.defineProperty(eventOptions, "bubbles", {
-      value: false,
-    });
-    return new PointerEvent(eventName, eventOptions);
-  }
+  // static #createNewPointerEventWithBubbleDisabled(event: PointerEvent, eventName: string) {
+  //   const eventOptions = event;
+  //   Object.defineProperty(eventOptions, "bubbles", {
+  //     value: false,
+  //   });
+  //   return new PointerEvent(eventName, eventOptions);
+  // }
 
   #setActiveState(
     element: DraggableElement,
