@@ -110,6 +110,9 @@ export function setDroppableOptions(
           globalDroppableOptions?.modifiers?.sorting?.isEnabled,
         action:
           options?.modifiers?.sorting?.action ?? globalDroppableOptions?.modifiers?.sorting?.action,
+        elmClass:
+          options?.modifiers?.sorting?.elmClass ??
+          globalDroppableOptions?.modifiers?.sorting?.elmClass,
         highlightClass:
           options?.modifiers?.sorting?.highlightClass ??
           globalDroppableOptions?.modifiers?.sorting?.highlightClass,

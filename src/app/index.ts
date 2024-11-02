@@ -881,9 +881,6 @@ export class Redrop {
         const dropElement = Redrop.#getDragOverElement(event, "drop");
 
         this.#draggedElementState.initialContainer = dropElement;
-        this.#draggedElementState.index = Array.from(dropElement?.children ?? []).indexOf(
-          (this.#draggedElement as Element) ?? null,
-        );
 
         const {
           modifiers: {
@@ -981,15 +978,8 @@ export class Redrop {
         }
         this.#lastDropElement.dispatchEvent(new PointerEvent("pointerenter", event));
       }
-
-      // const pointerMoveEvent = Redrop.#createNewPointerEventWithBubbleDisabled(
-      //   event,
-      //   "pointermove",
-      // );
-      // element.dispatchEvent(pointerMoveEvent);
     } else if (this.#simulatedDragEnter) {
       this.#simulatedDragEnter = false;
-      // this.#lastDropElement?.dispatchEvent(new PointerEvent("pointerleave", event));
     }
   }
 
@@ -1014,29 +1004,23 @@ export class Redrop {
 
     if (this.#draggedElement === null) return;
     // trigger drop event for touch devices
-    if (event.pointerType === "touch") {
-      if (this.#simulatedDragEnter) {
-        const pointerupEvent = Redrop.#createNewPointerEventWithBubbleDisabled(event, "pointerup");
-        this.#lastDropElement?.dispatchEvent(pointerupEvent);
-        this.#simulatedDragEnter = false;
-      }
-    }
+    // if (event.pointerType === "touch") {
+    //   if (this.#simulatedDragEnter) {
+    //     const pointerupEvent = Redrop.#createNewPointerEventWithBubbleDisabled(event, "pointerup");
+    //     this.#lastDropElement?.dispatchEvent(pointerupEvent);
+    //     this.#simulatedDragEnter = false;
+    //   }
+    // }
 
     const elmUnderCursor = Redrop.#getDragOverElement(event, "drop");
+    const container = this.#draggedElementState.initialContainer;
 
     const { autoRemove } = Redrop.getDraggables(this, this.#draggedElement).draggableOptions
       .modifiers;
-    if (!autoRemove && elmUnderCursor === null) {
-      const container = this.#draggedElementState.initialContainer;
-      const nodeRef =
-        container?.children[this.#draggedElementState.index ?? Number.POSITIVE_INFINITY];
-
-      if (this.#draggedElementState.index === (container?.childElementCount ?? 0)) {
-        container?.appendChild(this.#draggedElement);
-      } else if (nodeRef !== undefined) {
-        container?.insertBefore(this.#draggedElement, nodeRef);
-      }
+    if (autoRemove && elmUnderCursor === null) {
+      container?.removeChild(this.#draggedElement);
     }
+
     this.#dragEnd(event);
     this.#resetDndState();
   }
@@ -1051,16 +1035,19 @@ export class Redrop {
       (event) => {
         if (this.#draggedElement === null) return;
 
+        this.#draggedElementState.index = Array.from(dropElement?.children ?? []).indexOf(
+          (this.#draggedElement as Element) ?? null,
+        );
         this.#simulatedDragEnter = true;
         this.#lastDropzone = dropElement;
-        this.#sortElements(dropElement, event);
+
         const isGhostEnabled = Redrop.getDraggables(this, this.#draggedElement).draggableOptions
           .modifiers.dragPreview.ghost;
 
         const { sorting } = Redrop.getDroppables(this, dropElement).droppableOptions.modifiers;
         if ((isGhostEnabled || sorting.isEnabled) && !dropElement.contains(this.#draggedElement)) {
-          // this.#ghostImage = this.#draggedElement.cloneNode(true) as DraggableElement;
-          this.#ghostImage = this.#draggedElement;
+          this.#ghostImage = this.#draggedElement.cloneNode(true) as DraggableElement;
+          // this.#ghostImage = this.#draggedElement;
           dropElement.appendChild(this.#ghostImage);
         } else if (
           (isGhostEnabled || sorting.isEnabled) &&
@@ -1068,6 +1055,7 @@ export class Redrop {
         ) {
           this.#ghostImage = this.#draggedElement;
         }
+        this.#sortElements(dropElement, event);
         this.#dragEnter(event, dropElement);
       },
       {
@@ -1087,7 +1075,7 @@ export class Redrop {
           dropElement.removeChild(this.#ghostImage);
         } else if (this.#ghostImage !== null && this.#draggedElement === this.#ghostImage) {
           this.#ghostImage = null;
-          dropElement.removeChild(this.#draggedElement);
+          // dropElement.removeChild(this.#draggedElement);
         }
         this.#dragLeave(event, dropElement);
       },
@@ -1116,8 +1104,25 @@ export class Redrop {
       "pointerup",
       (event) => {
         if (dropElement !== this.#lastDropElement || this.#draggedElement === null) return;
-        this.#ghostImage = null;
+        // this.#ghostImage = null;
 
+        const elmUnderCursor = Redrop.#getDragOverElement(event, "drop");
+        const container = this.#draggedElementState.initialContainer;
+        const elmIndex = this.#draggedElementState.index ?? null;
+        const currentIndex = Array.from(container?.children ?? []).indexOf(
+          (this.#draggedElement as Element) ?? null,
+        );
+        if (elmUnderCursor !== null && elmUnderCursor !== container && elmIndex !== null) {
+          if (container?.children[elmIndex] !== this.#draggedElement) {
+            if (elmIndex === (container?.childElementCount ?? 0) - 1) {
+              container?.appendChild(this.#draggedElement);
+            } else
+              container?.insertBefore(
+                this.#draggedElement,
+                container?.children[currentIndex > elmIndex ? elmIndex : elmIndex + 1],
+              );
+          }
+        }
         this.#drop(event, dropElement);
         dropElement.dispatchEvent(new PointerEvent("pointerleave", event));
       },
@@ -1256,15 +1261,23 @@ export class Redrop {
   }
 
   // other utility methods
-
+  static #getSortingElement(event: PointerEvent, elmClass: string) {
+    const dataAttribute = "data-redrop-drag-id";
+    const elements = document.elementsFromPoint(event.clientX, event.clientY);
+    return (
+      elements.find((elm): elm is HTMLElement => {
+        return elm.hasAttribute(dataAttribute) || elm.classList.contains(elmClass);
+      }) ?? null
+    );
+  }
   #sortElements(dropElement: DroppableElement, event: PointerEvent) {
     const { sorting } = Redrop.getDroppables(this, dropElement).droppableOptions.modifiers;
     if (sorting.isEnabled) {
-      const elmUnderCursor = Redrop.#getDragOverElement(event, "drag");
+      const elmUnderCursor = Redrop.#getSortingElement(event, sorting.elmClass);
 
       if (elmUnderCursor !== null) {
         const elmIndex = Array.from(dropElement.children).indexOf(elmUnderCursor);
-        this.#draggedElementState.sortedIndex = elmIndex;
+        this.#draggedElementState.sortedIndex = elmIndex + 1;
 
         if (sorting.action === "highlight") {
           Array.from(dropElement.children).forEach((elm) => {
@@ -1283,8 +1296,16 @@ export class Redrop {
             }
           }
         }
-      } else if (dropElement.childElementCount === 0) {
-        this.#draggedElementState.sortedIndex = 0;
+      } else if (
+        dropElement.childElementCount === 1 &&
+        this.#ghostImage === dropElement.children[0]
+      ) {
+        this.#draggedElementState.sortedIndex = 1;
+      } else if (elmUnderCursor === null) {
+        const dropzoneUnderCursor = Redrop.#getDragOverElement(event, "drop");
+        if (dropzoneUnderCursor === dropElement) {
+          this.#draggedElementState.sortedIndex = dropElement.childElementCount;
+        }
       }
     }
   }

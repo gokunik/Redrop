@@ -20,6 +20,7 @@ export type BaseDroppableType = {
     disabled: boolean;
     sorting: {
       isEnabled: boolean;
+      elmClass: string;
       action: "swap" | "highlight";
       highlightClass: string;
     };

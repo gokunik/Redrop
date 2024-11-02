@@ -1,6 +1,6 @@
 {
   "name": "redrop",
-  "version": "0.0.0-aplha.1",
+  "version": "1.0.0",
   "description": "Redrop is a JS drag and drop library, an alternative to native HTML5 drag and drop API",
   "keywords": [
     "redrop",

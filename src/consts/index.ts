@@ -30,7 +30,7 @@ export const DEFAULT_DRAGGABLE_OPTIONS: BaseDraggableType = {
     tolerance: {
       disabled: false,
       time: 100,
-      distance: 8,
+      distance: 2,
       strictMatch: true,
     },
     dragHandleClass: "redrop-drag-handle",
@@ -53,8 +53,9 @@ export const DEFAULT_DROPPABLE_OPTIONS: BaseDroppableType = {
   modifiers: {
     disabled: false,
     sorting: {
-      isEnabled: true,
+      isEnabled: false,
       action: "swap",
+      elmClass: "sorting-item",
       highlightClass: "redrop-active-dropzone",
     },
     highlight: {
@@ -74,9 +75,9 @@ export const TRANSFER_OPTIONS: TransferOptions = {
   action: "copy",
   position: "append",
   index: null,
-  makeDraggable: false,
+  makeDraggable: true,
   reActivate: true,
-  reuseOptions: false,
-  reuseListeners: false,
+  reuseOptions: true,
+  reuseListeners: true,
   options: DEFAULT_DRAGGABLE_OPTIONS,
 } as const;
