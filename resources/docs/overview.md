@@ -2,6 +2,8 @@
 
 This is a quick overview of the Redrop library and its features. Redrop is a lightweight, customizable drag and drop library for JavaScript applications. It provides an easy-to-use API for creating draggable and droppable elements with extensive configuration options.
 
+This is just a quick overview for more details please visit docs.
+
 ## Table of Contents
 
 <!-- - [Installation](#installation) -->
@@ -171,7 +173,16 @@ droppables.on("drop", () => console.log("Dropped on a zone"));
 const redrop = new Redrop({
   draggableOptions: {
     modifiers: {
-      dragEffect: "move",
+      dragPreview: {
+        scale: 0.9,
+      },
+      cursor: {
+        offset: {
+          preset: "bottom-left",
+          x: 0,
+          y: 0,
+        },
+      },
     },
   },
   droppableOptions: {
@@ -228,14 +239,35 @@ redrop.enable("drop");
 #### BaseDraggableType
 
 ```typescript
-export type BaseDraggableType = {
+type BaseDraggableType = {
   identifier: {
     id: string;
     type: string;
   };
   modifiers: {
     disabled: boolean;
-    dragEffect: "copy" | "move" | "none";
+    cursor: {
+      offset: {
+        x: number;
+        y: number;
+        preset: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "auto";
+      };
+      dragEffect: string;
+    };
+    autoRemove: boolean;
+    dragPreview: {
+      customPreview: HTMLElement | ((element?: DraggableElement) => HTMLElement) | null;
+      ghost: boolean;
+      class: string;
+      scale: number;
+    };
+    tolerance: {
+      disabled: boolean;
+      time: number;
+      distance: number;
+      strictMatch: boolean;
+    };
+    dragHandleClass: string;
   };
   accessibility: {
     role: string;
@@ -251,7 +283,7 @@ Describes the base configuration for draggable elements.
 #### BaseDroppableType
 
 ```typescript
-export type BaseDroppableType = {
+type BaseDroppableType = {
   identifier: {
     id: string;
     type:
@@ -264,6 +296,12 @@ export type BaseDroppableType = {
   };
   modifiers: {
     disabled: boolean;
+    sorting: {
+      isEnabled: boolean;
+      elmClass: string;
+      action: "swap" | "highlight";
+      highlightClass: string;
+    };
     highlight: {
       on: "dragmove" | "dragover" | "none";
       class: string;
@@ -274,6 +312,39 @@ export type BaseDroppableType = {
 ```
 
 Describes the base configuration for droppable elements.
+
+#### DndState
+
+```typescript
+type DndState = {
+  active: {
+    element: DraggableElement;
+    options: BaseDraggableType;
+    isDisabled: boolean;
+    info: EventInfo;
+  } | null;
+  over: {
+    element: DroppableElement;
+    options: BaseDroppableType;
+    isDisabled: boolean;
+    info: EventInfo;
+  } | null;
+  data: any;
+};
+
+type Coords = { x: number; y: number };
+
+type EventInfo = {
+  rect: DOMRect;
+  target: HTMLElement;
+  position: {
+    page: Coords;
+    client: Coords;
+    offset: Coords;
+    screen: Coords;
+  };
+};
+```
 
 ### Option Types
 
@@ -341,6 +412,8 @@ Represents a collection of droppable elements.
 
 ### Global Options
 
+This [file](../../src/consts/index.ts) contains all the default options for draggableOptions, droppableOptions and globalOptions
+
 #### GlobalOptions
 
 ```typescript
@@ -351,27 +424,6 @@ export type GlobalOptions = RecursiveAtLeastOne<{
 ```
 
 Describes global options for both draggable and droppable elements, requiring at least one property from either `DraggableOptions` or `DroppableOptions`.
-
-### Utility Types
-
-#### RecursiveAtLeastOne
-
-```typescript
-type AtLeastOne<T> = {
-  [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>;
-}[keyof T];
-
-// RecursiveAtLeastOne should distribute over unions
-type Distribute<T> = T extends any ? AtLeastOne<T> : never;
-
-export type RecursiveAtLeastOne<T> = T extends object
-  ? Distribute<{
-      [K in keyof T]: T[K] extends object ? RecursiveAtLeastOne<T[K]> : T[K];
-    }>
-  : T;
-```
-
-Utility type that ensures at least one property is defined within an object, distributing over unions if necessary.
 
 ---
 

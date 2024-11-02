@@ -15,6 +15,9 @@
 
 ## ReDrop: A Simplified JavaScript Drag and Drop Library
 
+> [!IMPORTANT]  
+> ReDrop is not recommended to be used in production environment as it may contains bugs. I created this library as a drag and drop protoype and it does not necessarily follow all the best practices. ReDrop is best suited for hobby and protfolio projects because of it's simplicity and quick to setup nature.
+
 #### About
 
 ReDrop is a JavaScript drag and drop library, offering an intuitive alternative to the native HTML5 drag and drop API. ReDrop tries to make drag and drop as simple, quick and easy as possible. ReDrop is not built on top of HTML5 drag and drop API because of it's limitations. Under the hood ReDrop uses pointer events to simulate drag and drop with added features.
@@ -40,15 +43,15 @@ For more insights into the challenges posed by HTML5 drag and drop, feel free to
 
 ## Installation
 
-Installation guide will soon be updated. Currently the library is in alpha stage and is unreleased.
+Installation guide will soon be updated. I am currently working on creating the docs.
 
 ## Current State
 
-The base version of the library is ready but it still requires proper testing, fixing bugs, refactoring and documentation. I don't want to release a unstable version yet. Moving forward I'll be adding some more features and also try to setup proper testing.
+The base version of the library is ready. I have tested all the feature manually and do not plan to setup any automated tests in the future. Currently I am not aware about any known bugs but as I can not test manually for all teh use cases so there will be bugs. If you are using the library and need help, feel free to [open an issue](https://github.com/gokunik/Redrop/issues).
 
 ## How to Contribute
 
-If you have any suggestions or questions, please feel free to [open an issue](https://github.com/gokunik/Redrop/issues). For know you can create a issue or get in touch with me on [Github](https://github.com/gokunik) or through my socials if you want to contribute but moving forward I'll also add proper contribution guide in case anybody wants to contribute.
+If you have any suggestions or questions, please feel free to [open an issue](https://github.com/gokunik/Redrop/issues). For know you can create a issue or get in touch with me on [Github](https://github.com/gokunik) or through my socials if you want to contribute.
 
 ## Contact
 
