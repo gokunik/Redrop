@@ -20,7 +20,7 @@ export type BaseDraggableType = {
     };
     autoRemove: boolean;
     dragPreview: {
-      customPreview: HTMLElement | ((element?: DraggableElement) => HTMLElement) | null;
+      customPreview: HTMLElement | ((element: DraggableElement) => HTMLElement) | null;
       ghost: boolean;
       class: string;
       scale: number;

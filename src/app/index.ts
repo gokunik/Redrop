@@ -945,7 +945,11 @@ export class Redrop {
           dropzone.dispatchEvent(new PointerEvent("pointerleave", event));
         }
       });
-    } else if (element !== null && element !== this.#lastDropElement) {
+    } else if (
+      element !== null &&
+      element !== this.#lastDropElement &&
+      !this.#isDropEventAllowed(false, element)
+    ) {
       this.#targetDropzones.forEach((dropzone) => {
         if (dropzone.classList.contains("redrop-active-dropzone-highlight")) {
           dropzone.dispatchEvent(new PointerEvent("pointerleave", event));
@@ -1034,6 +1038,7 @@ export class Redrop {
       "pointerenter",
       (event) => {
         if (this.#draggedElement === null) return;
+        if (this.#isDropEventAllowed(false, dropElement)) return;
 
         this.#draggedElementState.index = Array.from(dropElement?.children ?? []).indexOf(
           (this.#draggedElement as Element) ?? null,
