@@ -1,5 +1,8 @@
 # Redrop
 
+> [!WARNING]
+> The following docs are not up to date. For the latest version, please visit [this](https://redrop.gitbook.io/docs/).
+
 This is a quick overview of the Redrop library and its features. Redrop is a lightweight, customizable drag and drop library for JavaScript applications. It provides an easy-to-use API for creating draggable and droppable elements with extensive configuration options.
 
 This is just a quick overview for more details please visit docs.

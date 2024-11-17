@@ -15,14 +15,14 @@
 
 ## ReDrop: A Simplified JavaScript Drag and Drop Library
 
-> [!IMPORTANT]  
-> ReDrop is not recommended to be used in production environment as it may contains bugs. I created this library as a drag and drop protoype and it does not necessarily follow all the best practices. ReDrop is best suited for hobby and protfolio projects because of it's simplicity and quick to setup nature.
+> [!IMPORTANT]
+> ReDrop is not recommended for use in production environments, as it will not receive long-term support. Instead, it is ideal for hobby and portfolio projects due to its simplicity and quick setup. This library serves as a prototype, showcasing how ReDrop can simplify implementing drag-and-drop functionality.
 
 #### About
 
 ReDrop is a JavaScript drag and drop library, offering an intuitive alternative to the native HTML5 drag and drop API. ReDrop tries to make drag and drop as simple, quick and easy as possible. ReDrop is not built on top of HTML5 drag and drop API because of it's limitations. Under the hood ReDrop uses pointer events to simulate drag and drop with added features.
 
-Get a quick overview of the Redrop [here](./resources/docs/overview.md) or checkout the doc.md file in the repository.
+For more information about the library please visit the documentation [here](https://redrop.gitbook.io/docs/)
 
 #### Purpose
 
@@ -43,11 +43,7 @@ For more insights into the challenges posed by HTML5 drag and drop, feel free to
 
 ## Installation
 
-Installation guide will soon be updated. I am currently working on creating the docs.
-
-## Current State
-
-The base version of the library is ready. I have tested all the feature manually and do not plan to setup any automated tests in the future. Currently I am not aware about any known bugs but as I can not test manually for all teh use cases so there will be bugs. If you are using the library and need help, feel free to [open an issue](https://github.com/gokunik/Redrop/issues).
+For installation guide please visit the installation documentation [here](https://redrop.gitbook.io/docs/getting-started/installation-guide)
 
 ## How to Contribute
 
